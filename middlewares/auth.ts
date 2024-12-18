@@ -1,5 +1,4 @@
 import Model from '#config/database'
-// import { inlineQuery } from '#query/inline'
 import { BotContext } from '#types/context'
 import { NextFunction } from 'grammy'
 import { memoryStorage } from '#config/storage'
@@ -8,14 +7,10 @@ import { IUser } from '#types/database'
 export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   if (ctx.from?.is_bot) return
 
-  // if inline query
-  // if (ctx.update?.inline_query?.id) {
-  //   return inlineQuery(ctx)
-  // }
-
   // Caching to memory
   const key = String(ctx.from?.id)
   let user = memoryStorage.read(key)
+
   if (user) {
     ctx.user = user
 
@@ -37,6 +32,7 @@ export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   }
 
   memoryStorage.write(key, user)
+
   ctx.user = user
 
   return next()
