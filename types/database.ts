@@ -14,3 +14,17 @@ export interface IAddress extends Document {
   longitude: number
   userId: number
 }
+
+export interface ICategory extends Document{
+  id:number,
+  name:string
+}
+
+export interface Iproducts extends Document{
+  id:number,
+  name:string,
+  description:string,
+  image:string,
+  price:number,
+  categoryId:number
+}

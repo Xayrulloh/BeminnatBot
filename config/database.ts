@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { IAddress, IUser } from '#types/database'
+import { IAddress, ICategory, IUser, Iproducts } from '#types/database'
 import { env } from '#utils/env'
 import { Color } from '#utils/enums'
 
@@ -52,8 +52,55 @@ const Address = new Schema(
   { versionKey: false },
 )
 
+const Category=new mongoose.Schema(
+  {
+    id:{
+      required:true,
+      type:Number,
+    },
+    name:{
+      required:true,
+      unique:true,
+      type:String,
+    }
+  },
+  { versionKey: false },
+
+)
+
+const Products=new mongoose.Schema({
+  id:{
+    required:true,
+    type:Number
+  },
+  name:{
+    required:true,
+    type:String,
+  },
+  description:{
+    required:true,
+    type:String
+  },
+  image:{
+    required:true,
+    type:String
+  },
+  price:{
+    required:true,
+    type:Number,
+  },
+  categoryId:{
+    required:true,
+    type:String,
+    ref:'Category'
+  }
+},
+{ versionKey: false },
+)
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
+mongoose.model<ICategory>('Category',Category)
+mongoose.model<Iproducts>('Products',Products)
 mongoose.set('strictQuery', false)
 
 mongoose
