@@ -13,7 +13,6 @@ import { ScenesComposer } from 'grammy-scenes'
 // import addHadith from './add-hadith'
 // import quran from './quran'
 // import feedback from './feedback'
-// import { BotContext } from '#types/context'
 
 export const scenes = new ScenesComposer<BotContext>(
   // notification,
