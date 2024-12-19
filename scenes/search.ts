@@ -5,7 +5,6 @@
 // import { HReplace } from '#helper/replacer'
 // import { BotContext } from '#types/context'
 // import { memoryStorage } from '#config/storage'
-// import { DAILY_HADITH_KEY } from '#utils/constants'
 // import { IPrayTime } from '#types/database'
 // import { InlineKeyboard } from 'grammy'
 // import dayjs from '#utils/dayjs'
@@ -123,8 +122,7 @@
 //     ],
 //   )
 
-//   const dailyHadith = memoryStorage.read(DAILY_HADITH_KEY) ?? String()
-//   await ctx.editMessageText(response + dailyHadith, { parse_mode: 'HTML' })
+//   await ctx.editMessageText(response, { parse_mode: 'HTML' })
 //   ctx.scene.exit()
 // })
 

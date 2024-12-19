@@ -5,7 +5,6 @@
 // import { HReplace } from '#helper/replacer'
 // import { BotContext } from '#types/context'
 // import { memoryStorage } from '#config/storage'
-// import { DAILY_HADITH_KEY } from '#utils/constants'
 // import { IPrayTime, IUser } from '#types/database'
 
 // let scene = new Scene<BotContext>('Location')
@@ -78,10 +77,9 @@
 //         ['$region', '$fajr', '$sunrise', '$zuhr', '$asr', '$maghrib', '$isha', '$date'],
 //         [data.region, data.fajr, data.sunrise, data.dhuhr, data.asr, data.maghrib, data.isha, now.format("DD/MM/YYYY")],
 //       )
-//       const dailyHadith = memoryStorage.read(DAILY_HADITH_KEY) ?? String()
 //       const locationMessage = HLanguage('locationChange')
 
-//       await ctx.editMessageText(locationMessage + '\n\n' + response + dailyHadith, {
+//       await ctx.editMessageText(locationMessage + '\n\n' + response, {
 //         parse_mode: 'HTML',
 //       })
 
