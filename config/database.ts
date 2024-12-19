@@ -97,6 +97,8 @@ const Products=new mongoose.Schema({
 },
 { versionKey: false },
 )
+
+
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
 mongoose.model<ICategory>('Category',Category)
