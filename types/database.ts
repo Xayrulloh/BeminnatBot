@@ -28,3 +28,11 @@ export interface Iproducts extends Document{
   price:number,
   categoryId:number
 }
+
+export interface Iorders extends Document{
+  id:number,
+  productId:number,
+  userid:number,
+  status:number,
+  count:number
+}
