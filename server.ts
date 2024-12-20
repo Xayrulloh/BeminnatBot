@@ -74,6 +74,10 @@ bot.command('start', async (ctx) => {
   ctx.scenes.enter('Start')
 })
 
+bot.command('address', async (ctx) => {
+  ctx.scenes.enter('Address')
+})
+
 // bot.command('source', async (ctx) => {
 //   await ctx.scenes.enter('Source')
 // })
