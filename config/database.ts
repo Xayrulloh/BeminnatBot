@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { IAddress, ICategory, IUser, Iorders, Iproducts } from '#types/database'
+import { IAddress, ICategory, IOrders, IUser, Iproducts } from '#types/database'
 import { env } from '#utils/env'
 import { Color } from '#utils/enums'
 
@@ -103,7 +103,7 @@ const Orders=new mongoose.Schema({
     required:true,
     type:Number
   },
-  categoryId:{
+  productId:{
     required:true,
     type:Number,
     ref:"Category"
@@ -128,7 +128,7 @@ mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
 mongoose.model<ICategory>('Category',Category)
 mongoose.model<Iproducts>('Products',Products)
-mongoose.model<Iorders>('Orders',Orders)
+mongoose.model<IOrders>('Orders',Orders)
 
 mongoose.set('strictQuery', false)
 
