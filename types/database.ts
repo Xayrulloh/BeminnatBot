@@ -14,3 +14,30 @@ export interface IAddress extends Document {
   userId: number
   name: string
 }
+
+
+export interface IProducts extends Document {
+  id: number,
+  name: string,
+  description: string
+  image: string
+  price :number,
+  categoryId:number
+}
+
+
+export interface ICategory extends Document {
+  id: number,
+  name: string,
+
+}
+
+
+
+export interface IOrders extends Document {
+  id: number,
+  productId:number
+  userId:number
+  status:boolean,
+  count:number
+}
