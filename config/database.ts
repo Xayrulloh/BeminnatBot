@@ -31,10 +31,6 @@ const User = new Schema(
 
 const Address = new Schema(
   {
-    id: {
-      required: true,
-      type: Number,
-    },
     latitude: {
       required: true,
       type: Number,
@@ -48,9 +44,15 @@ const Address = new Schema(
       type: Number,
       ref: 'User',
     },
+    name: {
+      required: true,
+      type: String,
+    }
   },
   { versionKey: false },
 )
+
+Address.index({ userId: 1, name: 1 }, { unique: true });
 
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)

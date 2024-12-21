@@ -32,14 +32,12 @@ scene.wait('the_end').on("message:contact", async (ctx) => {
     phoneNumber: contact.phone_number,
   })
 
-  const buttons = customKFunction(2, ...MAIN_KEYBOARD)
-
   await ctx.reply('Xush kelibsiz', {
     reply_markup: {
-      keyboard: buttons.build(),
+      keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
       resize_keyboard: true,
     },
-    parse_mode: 'HTML',
+    parse_mode: 'HTML',    
   })
 
   ctx.scene.exit()
