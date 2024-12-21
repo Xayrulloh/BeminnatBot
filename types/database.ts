@@ -9,10 +9,10 @@ export interface IUser extends Document {
 }
 
 export interface IAddress extends Document {
-  id: number,
-  latitude: number,
+  latitude: number
   longitude: number
   userId: number
+  name: string
 }
 
 

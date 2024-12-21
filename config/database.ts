@@ -31,10 +31,6 @@ const User = new Schema(
 
 const Address = new Schema(
   {
-    id: {
-      required: true,
-      type: Number,
-    },
     latitude: {
       required: true,
       type: Number,
@@ -47,6 +43,10 @@ const Address = new Schema(
       required: true,
       type: Number,
       ref: 'User',
+    },
+    name: {
+      required: true,
+      type: String,
     },
   },
   { versionKey: false },
@@ -84,46 +84,50 @@ const Products = new Schema(
   { versionKey: false },
 )
 
-const Category=new Schema({
-  id:{
-    required: true,
+const Category = new Schema(
+  {
+    id: {
+      required: true,
       type: Number,
-  }
-  ,
-  name:{
-    required: true,
-    type:String,
-  }
-},
-{ versionKey: false },)
+    },
+    name: {
+      required: true,
+      type: String,
+    },
+  },
+  { versionKey: false },
+)
 
-const Orders=new Schema({
-  id:{
-    required: true,
+const Orders = new Schema(
+  {
+    id: {
+      required: true,
       type: Number,
-  }
-  ,
-  productId:{
-    required:true,
-    type:Number,
-    ref:'Product'
+    },
+    productId: {
+      required: true,
+      type: Number,
+      ref: 'Product',
+    },
+    userId: {
+      required: true,
+      type: Number,
+      ref: 'User',
+    },
+    status: {
+      required: true,
+      type: Boolean,
+    },
+    count: {
+      required: true,
+      type: Number,
+    },
   },
-  userId:{
-    required:true,
-    type:Number,  
-    ref:'User'
-  }
-  ,
-  status:{
-    required:true,
-    type: Boolean
-  },
-  count:{
-    required:true,
-    type:Number 
-  }
-},
-  { versionKey: false },)
+  { versionKey: false },
+)
+
+Address.index({ userId: 1, name: 1 }, { unique: true })
+
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
 mongoose.model<ICategory>('Category', Category)
