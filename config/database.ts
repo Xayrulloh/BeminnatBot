@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { IAddress, IUser } from '#types/database'
+import { IAddress, ICategory, IOrders, IProducts, IUser } from '#types/database'
 import { env } from '#utils/env'
 import { Color } from '#utils/enums'
 
@@ -52,8 +52,83 @@ const Address = new Schema(
   { versionKey: false },
 )
 
+const Products = new Schema(
+  {
+    id: {
+      required: true,
+      type: Number,
+    },
+
+    name: {
+      required: true,
+      type: String,
+    },
+    description: {
+      required: true,
+      type: String,
+    },
+    image: {
+      required: true,
+      type: String,
+    },
+    price: {
+      required: true,
+      type: Number,
+    },
+    categoryId: {
+      required: true,
+      type: Number,
+      ref: 'Category',
+    },
+  },
+  { versionKey: false },
+)
+
+const Category=new Schema({
+  id:{
+    required: true,
+      type: Number,
+  }
+  ,
+  name:{
+    required: true,
+    type:String,
+  }
+},
+{ versionKey: false },)
+
+const Orders=new Schema({
+  id:{
+    required: true,
+      type: Number,
+  }
+  ,
+  productId:{
+    required:true,
+    type:Number,
+    ref:'Product'
+  },
+  userId:{
+    required:true,
+    type:Number,  
+    ref:'User'
+  }
+  ,
+  status:{
+    required:true,
+    type: Boolean
+  },
+  count:{
+    required:true,
+    type:Number 
+  }
+},
+  { versionKey: false },)
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
+mongoose.model<ICategory>('Category', Category)
+mongoose.model<IProducts>('Products', Products)
+mongoose.model<IOrders>('Orders', Orders)
 mongoose.set('strictQuery', false)
 
 mongoose
