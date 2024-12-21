@@ -5,7 +5,8 @@
   "main": "server.ts",
   "type": "commonjs",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register server.ts"
+    "start": "ts-node -r tsconfig-paths/register server.ts",
+    "format": "prettier --write ."
   },
   "author": "",
   "license": "MIT",

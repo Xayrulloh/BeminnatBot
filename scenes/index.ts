@@ -1,5 +1,5 @@
 import { BotContext } from '#types/context'
-import { ScenesComposer } from 'grammy-scenes';
+import { ScenesComposer } from 'grammy-scenes'
 import start from './start'
 import address from './address'
 // import location from './location'
@@ -23,7 +23,7 @@ export const scenes = new ScenesComposer<BotContext>(
   // location,
   // fasting,
   start,
-  address
+  address,
   // donate,
   // hadith,
   // source,

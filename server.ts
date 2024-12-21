@@ -89,7 +89,6 @@ bot.command('address', async (ctx) => {
 bot.on('message:text', async (ctx) => {
   // console.log('🚀 ~ ctx:', ctx)
   // const mappedScene = keyboardMapper(ctx.message.text)
-
   // if (mappedScene) {
   //   return ctx.scenes.enter(mappedScene)
   // }
@@ -109,4 +108,3 @@ bot
     console.error(Color.Red, 'Something went wrong!', e)
     process.exit()
   })
-

@@ -10,19 +10,16 @@ const scene = new Scene<BotContext>('Start')
 
 // phoneNumber
 scene.step(async (ctx) => {
-  const keyboard = new Keyboard()
-    .requestContact("📱 Telefon raqamni yuborish")
-    .resized()
-    .oneTime();
+  const keyboard = new Keyboard().requestContact('📱 Telefon raqamni yuborish').resized().oneTime()
 
-  await ctx.reply("Assalomu alaykum.\n\nIltimos, telefon raqamingizni yuboring.", {
+  await ctx.reply('Assalomu alaykum.\n\nIltimos, telefon raqamingizni yuboring.', {
     reply_markup: keyboard,
-  });
+  })
 })
 
 // save to db
-scene.wait('the_end').on("message:contact", async (ctx) => {
-  const contact = ctx.message.contact;
+scene.wait('the_end').on('message:contact', async (ctx) => {
+  const contact = ctx.message.contact
   const user = ctx.update.message?.from
 
   await Model.User.create<IUser>({
@@ -37,10 +34,10 @@ scene.wait('the_end').on("message:contact", async (ctx) => {
       keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
       resize_keyboard: true,
     },
-    parse_mode: 'HTML',    
+    parse_mode: 'HTML',
   })
 
   ctx.scene.exit()
-});
+})
 
 export default scene
