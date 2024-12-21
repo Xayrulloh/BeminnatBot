@@ -8,8 +8,10 @@ import { env } from '#utils/env'
 import { Color } from '#utils/enums'
 import { errorHandler } from '#helper/errorHandler'
 import { autoRetry } from '@grammyjs/auto-retry'
+import dotenv from "dotenv"
 // import Model from '#config/database'
 // import { WebhookClient, EmbedBuilder } from 'discord.js'
+dotenv.config()
 
 const bot = new Bot<BotContext>(env.TOKEN)
 
@@ -76,6 +78,10 @@ bot.command('start', async (ctx) => {
 
 bot.command('address', async (ctx) => {
   ctx.scenes.enter('Address')
+})
+
+bot.command('bucket',async (ctx)=>{
+  ctx.scenes.enter('Bucket')
 })
 
 // bot.command('source', async (ctx) => {
