@@ -93,6 +93,7 @@ const Category = new Schema(
     name: {
       required: true,
       type: String,
+      unique: true
     },
   },
   { versionKey: false },

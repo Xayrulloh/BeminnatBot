@@ -78,9 +78,9 @@ bot.command('address', async (ctx) => {
   ctx.scenes.enter('Address')
 })
 
-// bot.command('source', async (ctx) => {
-//   await ctx.scenes.enter('Source')
-// })
+bot.command('admin_category', async (ctx) => {
+  await ctx.scenes.enter('AdminCategory')
+})
 
 // bot.command('feedback', async (ctx) => {
 //   await ctx.scenes.enter('Feedback')

@@ -10,7 +10,7 @@ import address from './address'
 // import announcement from './announcement'
 // import donate from './donate'
 // import hadith from './hadith'
-// import source from './source'
+import adminCategory from './admin-category'
 // import addHadith from './add-hadith'
 // import quran from './quran'
 // import feedback from './feedback'
@@ -24,6 +24,7 @@ export const scenes = new ScenesComposer<BotContext>(
   // fasting,
   start,
   address,
+  adminCategory
   // donate,
   // hadith,
   // source,
