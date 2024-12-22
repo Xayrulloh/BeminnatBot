@@ -41,8 +41,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
-            cd BeminnatBot
-            cd projects/BeminnatBot
+            cd Code/BeminnatBot
             git pull
             pnpm install
             pnpm run build
