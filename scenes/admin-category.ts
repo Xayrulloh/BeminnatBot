@@ -1,12 +1,12 @@
-import {Scene} from "grammy-scenes";
-import {BotContext} from "#types/context";
-import { ICategory } from "#types/database";
-import Model from "#config/database";
-import inlineKFunction from "#keyboard/inline";
-import customKFunction from "#keyboard/custom";
-import { MAIN_KEYBOARD } from "#utils/constants";
+import { Scene } from 'grammy-scenes'
+import { BotContext } from '#types/context'
+import { ICategory } from '#types/database'
+import Model from '#config/database'
+import inlineKFunction from '#keyboard/inline'
+import customKFunction from '#keyboard/custom'
+import { MAIN_KEYBOARD } from '#utils/constants'
 
-const scene = new Scene<BotContext>('AdminCategory');
+const scene = new Scene<BotContext>('AdminCategory')
 
 // show and decide rather to delete, update or create
 scene.step(async (ctx) => {
@@ -21,7 +21,7 @@ scene.step(async (ctx) => {
   for (const category of categories) {
     const buttons = inlineKFunction(2, [
       {
-        view: '🗑 O\'chirish',
+        view: "🗑 O'chirish",
         text: `delete_${category.id}`,
       },
       {
@@ -30,13 +30,13 @@ scene.step(async (ctx) => {
       },
     ])
 
-    await ctx.reply(`${category.name}`, {reply_markup: buttons});
+    await ctx.reply(`${category.name}`, { reply_markup: buttons })
   }
 
-  const createButton = inlineKFunction(1, [{view: '➕ Yangi yasash', text: 'create'}])
+  const createButton = inlineKFunction(1, [{ view: '➕ Yangi yasash', text: 'create' }])
 
-  await ctx.reply('Yangi kategoriyani qo\'shish', {reply_markup: {...createButton, remove_keyboard: true}});
-});
+  await ctx.reply("Yangi kategoriyani qo'shish", { reply_markup: { ...createButton, remove_keyboard: true } })
+})
 
 // delete, update or create
 scene.wait('delete_add_update').on('callback_query:data', async (ctx) => {
@@ -57,13 +57,13 @@ scene.wait('delete_add_update').on('callback_query:data', async (ctx) => {
 
     ctx.reply('Kategoriya nomini kiriting', {
       reply_markup: {
-        remove_keyboard: true
+        remove_keyboard: true,
       },
     })
   } else if (ctx.session.command === 'update') {
     ctx.reply('Kategoriya nomini kiriting', {
       reply_markup: {
-        remove_keyboard: true
+        remove_keyboard: true,
       },
     })
   } else if (ctx.session.command === 'delete') {
@@ -71,7 +71,7 @@ scene.wait('delete_add_update').on('callback_query:data', async (ctx) => {
 
     ctx.deleteMessage()
 
-    ctx.reply('Kategoriya o\'chirildi', {
+    ctx.reply("Kategoriya o'chirildi", {
       reply_markup: {
         keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
         resize_keyboard: true,
@@ -96,21 +96,23 @@ scene.wait('category_name').on('message:text', async (ctx) => {
         name: textData,
         id: Date.now(),
       })
-  
-      ctx.reply('Kategoriya muvaffaqiyatli qo\'shildi', {
+
+      ctx.reply("Kategoriya muvaffaqiyatli qo'shildi", {
         reply_markup: {
           keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
           resize_keyboard: true,
         },
       })
     }
-
   } else if (ctx.session.command === 'update') {
-    await Model.Category.updateOne({
-      id: ctx.session.categoryId,
-    }, {
-      name: textData,
-    })
+    await Model.Category.updateOne(
+      {
+        id: ctx.session.categoryId,
+      },
+      {
+        name: textData,
+      },
+    )
 
     ctx.reply('Kategoriya muvaffaqiyatli yangilandi', {
       reply_markup: {
@@ -123,4 +125,4 @@ scene.wait('category_name').on('message:text', async (ctx) => {
   ctx.scene.exit()
 })
 
-export default scene;
+export default scene

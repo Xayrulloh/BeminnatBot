@@ -24,7 +24,7 @@ export const scenes = new ScenesComposer<BotContext>(
   // fasting,
   start,
   address,
-  adminCategory
+  adminCategory,
   // donate,
   // hadith,
   // source,

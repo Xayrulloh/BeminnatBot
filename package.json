@@ -5,8 +5,12 @@
   "main": "server.ts",
   "type": "commonjs",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register server.ts",
-    "format": "prettier --write ."
+    "prebuild": "rimraf dist",
+    "build": "pnpm run prebuild && tsc",
+    "start": "TS_NODE_BASEURL=./dist node -r tsconfig-paths/register --env-file=.env dist/server.js",
+    "start:dev": "tsc-watch --outDir ./dist --onSuccess 'pnpm start'",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "author": "",
   "license": "MIT",
@@ -30,6 +34,7 @@
     "prettier": "3.0.3",
     "tsc-watch": "6.0.4",
     "tsconfig-paths": "4.2.0",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "rimraf": "5.0.1"
   }
 }
