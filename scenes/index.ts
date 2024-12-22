@@ -2,6 +2,7 @@ import { BotContext } from '#types/context'
 import { ScenesComposer } from 'grammy-scenes';
 import start from './start'
 import address from './address'
+import orders  from './orders'
 // import location from './location'
 // import search from './search'
 // import notification from './notification'
@@ -23,7 +24,8 @@ export const scenes = new ScenesComposer<BotContext>(
   // location,
   // fasting,
   start,
-  address
+  address,
+  orders,
   // donate,
   // hadith,
   // source,
