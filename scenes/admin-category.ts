@@ -4,15 +4,20 @@ import { ICategory } from '#types/database'
 import Model from '#config/database'
 import inlineKFunction from '#keyboard/inline'
 import customKFunction from '#keyboard/custom'
-import { MAIN_KEYBOARD } from '#utils/constants'
+import { messageDeleter } from '#helper/messageDeleter'
+import { UserKeyboard } from '#helper/putUserKeyboard'
+import { exitScene } from '#helper/exitScene'
 
 const scene = new Scene<BotContext>('AdminCategory')
 
 // show and decide rather to delete, update or create
 scene.step(async (ctx) => {
-  if (ctx.user.userId != 1151533771) {
+  if (ctx.user.userId != 1151533772) {
     return ctx.scene.exit()
   }
+
+  ctx.session.messageIds = [ctx.update.message?.message_id]
+  ctx.session.chatId = ctx.chat?.id
 
   const categories = await Model.Category.find<ICategory>()
 
@@ -30,12 +35,18 @@ scene.step(async (ctx) => {
       },
     ])
 
-    await ctx.reply(`${category.name}`, { reply_markup: { ...buttons, remove_keyboard: true } })
+    const message = await ctx.reply(`${category.name}`, { reply_markup: { ...buttons, remove_keyboard: true } })
+
+    ctx.session.messageIds.push(message.message_id)
   }
 
   const createButton = inlineKFunction(1, [{ view: '➕ Yangi yasash', text: 'create' }])
 
-  await ctx.reply("Yangi kategoriyani qo'shish", { reply_markup: { ...createButton, remove_keyboard: true } })
+  const message = await ctx.reply("Yangi kategoriyani qo'shish", {
+    reply_markup: { ...createButton, remove_keyboard: true },
+  })
+
+  ctx.session.messageIds.push(message.message_id)
 })
 
 // delete, update or create
@@ -53,32 +64,29 @@ scene.wait('delete_add_update').on('callback_query:data', async (ctx) => {
 
   // create
   if (ctx.session.command === 'create') {
-    await ctx.deleteMessage()
+    await messageDeleter(ctx)
 
-    ctx.reply('Kategoriya nomini kiriting', {
+    const message = await ctx.reply('Kategoriya nomini kiriting', {
       reply_markup: {
         remove_keyboard: true,
       },
     })
+
+    ctx.session.messageIds = [message.message_id]
   } else if (ctx.session.command === 'update') {
-    ctx.reply('Kategoriya nomini kiriting', {
+    await messageDeleter(ctx)
+
+    const message = await ctx.reply('Kategoriya nomini kiriting', {
       reply_markup: {
         remove_keyboard: true,
       },
     })
+
+    ctx.session.messageIds = [message.message_id]
   } else if (ctx.session.command === 'delete') {
     await Model.Category.deleteOne({ id: ctx.session.categoryId })
 
-    ctx.deleteMessage()
-
-    ctx.reply("Kategoriya o'chirildi", {
-      reply_markup: {
-        keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-        resize_keyboard: true,
-      },
-    })
-
-    ctx.scene.exit()
+    return exitScene(ctx, "Kategoriya o'chirildi")
   }
 
   ctx.scene.resume()
@@ -90,19 +98,18 @@ scene.wait('category_name').on('message:text', async (ctx) => {
 
   if (ctx.session.command === 'create') {
     if (ctx.session.categories.find((c: ICategory) => c.name === textData)) {
-      ctx.reply('Bunday kategoriya mavjud')
+      const message = await ctx.reply('Bunday kategoriya mavjud. Iltimos boshqa nom bering')
+
+      ctx.session.messageIds.push(message.message_id)
     } else {
       await Model.Category.create({
         name: textData,
         id: Date.now(),
       })
 
-      ctx.reply("Kategoriya muvaffaqiyatli qo'shildi", {
-        reply_markup: {
-          keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-          resize_keyboard: true,
-        },
-      })
+      ctx.session.messageIds.push(ctx.message?.message_id)
+
+      return exitScene(ctx, "Kategoriya muvaffaqiyatli qo'shildi")
     }
   } else if (ctx.session.command === 'update') {
     await Model.Category.updateOne(
@@ -114,15 +121,10 @@ scene.wait('category_name').on('message:text', async (ctx) => {
       },
     )
 
-    ctx.reply('Kategoriya muvaffaqiyatli yangilandi', {
-      reply_markup: {
-        keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-        resize_keyboard: true,
-      },
-    })
-  }
+    ctx.session.messageIds.push(ctx.message?.message_id)
 
-  ctx.scene.exit()
+    return exitScene(ctx, 'Kategoriya muvaffaqiyatli yangilandi')
+  }
 })
 
 export default scene

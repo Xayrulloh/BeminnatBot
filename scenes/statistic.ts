@@ -16,7 +16,7 @@
 
 //   keyboard.url(enterMessage, 'https://t.me/' + ctx.me.username)
 
-//   if ([1151533771, 900604435, 962526857].includes(ctx.user.userId)) {
+//   if ([1151533772, 900604435, 962526857].includes(ctx.user.userId)) {
 //     const usersInfo = users.reduce(
 //       (userObj, user) => {
 //         if (user.status === false && !user.deletedAt) ++userObj.blockedUsers

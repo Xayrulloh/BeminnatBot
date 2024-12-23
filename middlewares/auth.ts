@@ -7,7 +7,7 @@ import { IUser } from '#types/database'
 export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   if (ctx.from?.is_bot) return
 
-  ctx.deleteMessage()
+  ctx.deleteMessage().catch(() => {})
 
   // Caching to memory
   const key = String(ctx.from?.id)
