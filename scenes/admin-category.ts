@@ -30,7 +30,7 @@ scene.step(async (ctx) => {
       },
     ])
 
-    await ctx.reply(`${category.name}`, { reply_markup: {...buttons, remove_keyboard: true} })
+    await ctx.reply(`${category.name}`, { reply_markup: { ...buttons, remove_keyboard: true } })
   }
 
   const createButton = inlineKFunction(1, [{ view: '➕ Yangi yasash', text: 'create' }])
