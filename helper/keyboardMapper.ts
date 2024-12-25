@@ -5,7 +5,7 @@ export const keyboardMapper = (text: string) => {
     '🛒 Savat': 'Bucket',
     '🚚 Buyurtmalar': 'Order',
     '📁 Kategoriya': 'AdminCategory',
-    '📍 Joylashuv': 'AdminAddress',
+    // '📍 Joylashuv': 'AdminAddress',
     '🛍️ Mahsulot': 'AdminProduct',
   }
 

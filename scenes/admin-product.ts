@@ -1,4 +1,5 @@
 import { Scene } from 'grammy-scenes'
+import { randomBytes } from 'crypto'
 import { BotContext } from '#types/context'
 import { ICategory, IProduct } from '#types/database'
 import Model from '#config/database'
@@ -8,6 +9,7 @@ import customKFunction from '#keyboard/custom'
 import inlineKFunction from '#keyboard/inline'
 import { env } from '#utils/env'
 import { deleteImage, uploadImage } from '#helper/cloudflare'
+import { PER_PAGE } from '#utils/constants'
 
 const scene = new Scene<BotContext>('AdminProduct')
 
@@ -36,9 +38,11 @@ scene.step(async (ctx) => {
   })
 
   ctx.session.messageIds.push(message.message_id)
+
+  ctx.session.currPage = 1
 })
 
-// take which category
+// take which category and show products
 scene.wait('category_name').on('message:text', async (ctx) => {
   const categoryName = ctx.message?.text
 
@@ -56,25 +60,13 @@ scene.wait('category_name').on('message:text', async (ctx) => {
   const products = await Model.Product.find<IProduct>({
     categoryId: ctx.session.categoryId,
   })
-
-  // only create a new product
-  if (!products.length) {
-    const message = await ctx.reply(
-      "Ushbu kategoriyada xech qanday mahsulat mavjud emas.\nYangi mahsulat qo'shishni xohlaysizmi?",
-      {
-        reply_markup: {
-          ...inlineKFunction(2, [
-            { view: "➕ Yangi maxsulot qo'shish", text: 'create' },
-            { view: '◀️ Chiqish', text: 'exit' },
-          ]),
-        },
-      },
-    )
-
-    ctx.session.messageIds.push(message.message_id)
-  }
+    .sort({ id: -1 })
+    .skip((ctx.session.currPage - 1) * PER_PAGE)
+    .limit(PER_PAGE)
 
   ctx.session.productIds = products.map((p: IProduct) => p.id)
+
+  ctx.session.messageIds = []
 
   // [product, with buttons [delete, update]] || pagination later
   for (const product of products) {
@@ -83,16 +75,30 @@ scene.wait('category_name').on('message:text', async (ctx) => {
       { view: '✏️ Yangilash', text: `update_${product.id}` },
     ])
 
-    console.log(`${env.CLOUDFLARE_URL}${product.image}`)
-    console.log('https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/AQADuuwxGzfUYUt-.png')
-
     const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${product.image}`, {
       reply_markup: buttons,
       caption: `Nomi: ${product.name}\nMa\'lumoti: ${product.description}\nNarxi: ${product.price}`,
     })
 
-    ctx.session.messageIds = [message.message_id]
+    ctx.session.messageIds.push(message.message_id)
   }
+
+  const properties = [
+    { view: "➕ Yangi maxsulot qo'shish", text: 'create' },
+    { view: '◀️ Chiqish', text: 'exit' },
+  ]
+
+  if (products.length === PER_PAGE) {
+    properties.push({ view: '➡️ Keyingisi', text: 'next' })
+  }
+
+  const message = await ctx.reply("Yangi mahsulot qo'shishni xohlaysizmi?", {
+    reply_markup: {
+      ...inlineKFunction(2, properties),
+    },
+  })
+
+  ctx.session.messageIds.push(message.message_id)
 
   ctx.scene.resume()
 })
@@ -105,49 +111,154 @@ scene.wait('create_delete_update').on('callback_query:data', async (ctx) => {
   const productId = inlineData?.split('_')[1]
 
   // check
-  if (!['update', 'delete', 'create', 'exit'].includes(command)) {
+  if (!['update', 'delete', 'create', 'exit', 'next', 'previous'].includes(command)) {
     return await ctx.answerCallbackQuery()
   }
 
-  // check is product exists
-  if (!ctx.session.productIds.includes(parseInt(productId)) && ['update', 'delete'].includes(command)) {
-    return await ctx.answerCallbackQuery('Bunday mahsulot mavjud emas')
-  }
+  if (['next', 'previous'].includes(command)) {
+    if (command === 'next') {
+      ctx.session.currPage += 1
 
-  // create, update, delete
-  if (command === 'create' || command === 'update') {
-    // image, categoryId
-    await messageDeleter(ctx)
+      await messageDeleter(ctx)
 
-    ctx.session.productId = productId
+      const products = await Model.Product.find<IProduct>({
+        categoryId: ctx.session.categoryId,
+      })
+        .sort({ id: -1 })
+        .skip((ctx.session.currPage - 1) * PER_PAGE)
+        .limit(PER_PAGE)
 
-    const message = await ctx.replyWithPhoto('https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/browser.jpg', {
-      caption: "Iltimos ma'lumotlarni quyidagi tartibda kiriting!\n\nNomi:\nMa'lumoti:\nNarxi:",
-      reply_markup: {
-        resize_keyboard: true,
-        keyboard: customKFunction(1, '◀️ Chiqish').build(),
-      },
-    })
+      ctx.session.productIds = products.map((p: IProduct) => p.id)
 
-    ctx.session.messageIds = [message.message_id]
+      ctx.session.messageIds = []
 
-    ctx.session.command = command
+      // [product, with buttons [delete, update]] || pagination later
+      for (const product of products) {
+        const buttons = inlineKFunction(2, [
+          { view: "🗑 O'chirish", text: `delete_${product.id}` },
+          { view: '✏️ Yangilash', text: `update_${product.id}` },
+        ])
 
-    ctx.scene.resume()
-  } else if (command === 'delete') {
-    await Model.Product.deleteOne({ id: productId })
+        const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${product.image}`, {
+          reply_markup: buttons,
+          caption: `Nomi: ${product.name}\nMa\'lumoti: ${product.description}\nNarxi: ${product.price}`,
+        })
 
-    return exitScene(ctx, "Mahsulotni muvaffaqiyatli o'chirildi")
-  } else if (command === 'exit') {
-    ctx.session.messageIds.push(ctx.message?.message_id)
+        ctx.session.messageIds.push(message.message_id)
+      }
 
-    return exitScene(ctx, "Asosiy menuga o'tildi")
+      const properties = [
+        { view: "➕ Yangi maxsulot qo'shish", text: 'create' },
+        { view: '◀️ Chiqish', text: 'exit' },
+      ]
+
+      if (products.length === PER_PAGE * ctx.session.currPage) {
+        properties.push({ view: '➡️ Keyingisi', text: 'next' })
+      }
+
+      if (ctx.session.currPage > 1) {
+        properties.unshift({ view: '⬅️ Oldingisi', text: 'previous' })
+      }
+
+      const message = await ctx.reply("Yangi mahsulot qo'shishni xohlaysizmi?", {
+        reply_markup: {
+          ...inlineKFunction(2, properties),
+        },
+      })
+
+      ctx.session.messageIds.push(message.message_id)
+    } else if (command === 'previous') {
+      ctx.session.currPage -= 1
+
+      await messageDeleter(ctx)
+
+      const products = await Model.Product.find<IProduct>({
+        categoryId: ctx.session.categoryId,
+      })
+        .sort({ id: -1 })
+        .skip((ctx.session.currPage - 1) * PER_PAGE)
+        .limit(PER_PAGE)
+
+      ctx.session.productIds = products.map((p: IProduct) => p.id)
+
+      ctx.session.messageIds = []
+
+      // [product, with buttons [delete, update]] || pagination later
+      for (const product of products) {
+        const buttons = inlineKFunction(2, [
+          { view: "🗑 O'chirish", text: `delete_${product.id}` },
+          { view: '✏️ Yangilash', text: `update_${product.id}` },
+        ])
+
+        const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${product.image}`, {
+          reply_markup: buttons,
+          caption: `Nomi: ${product.name}\nMa\'lumoti: ${product.description}\nNarxi: ${product.price}`,
+        })
+
+        ctx.session.messageIds.push(message.message_id)
+      }
+
+      const properties = [
+        { view: "➕ Yangi maxsulot qo'shish", text: 'create' },
+        { view: '◀️ Chiqish', text: 'exit' },
+      ]
+
+      if (products.length === PER_PAGE * ctx.session.currPage) {
+        properties.push({ view: '➡️ Keyingisi', text: 'next' })
+      }
+
+      if (ctx.session.currPage > 1) {
+        properties.unshift({ view: '⬅️ Oldingisi', text: 'previous' })
+      }
+
+      const message = await ctx.reply("Yangi mahsulot qo'shishni xohlaysizmi?", {
+        reply_markup: {
+          ...inlineKFunction(2, properties),
+        },
+      })
+
+      ctx.session.messageIds.push(message.message_id)
+    }
+  } else {
+    // check is product exists
+    if (!ctx.session.productIds.includes(parseInt(productId)) && ['update', 'delete'].includes(command)) {
+      return await ctx.answerCallbackQuery('Bunday mahsulot mavjud emas')
+    }
+
+    // create, update, delete
+    if (command === 'create' || command === 'update') {
+      // image, categoryId
+      await messageDeleter(ctx)
+
+      ctx.session.productId = productId
+
+      const message = await ctx.replyWithPhoto('https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/browser.jpg', {
+        caption: "Iltimos ma'lumotlarni quyidagi tartibda kiriting!\n\nNomi:\nMa'lumoti:\nNarxi:",
+        reply_markup: {
+          resize_keyboard: true,
+          keyboard: customKFunction(1, '◀️ Chiqish').build(),
+        },
+      })
+
+      ctx.session.messageIds = [message.message_id]
+
+      ctx.session.command = command
+
+      ctx.scene.resume()
+    } else if (command === 'delete') {
+      await Model.Product.deleteOne({ id: productId })
+
+      return exitScene(ctx, "Mahsulotni muvaffaqiyatli o'chirildi")
+    } else if (command === 'exit') {
+      ctx.session.messageIds.push(ctx.message?.message_id)
+
+      return exitScene(ctx, "Asosiy menuga o'tildi")
+    }
   }
 })
 
 // create or update [text part]
 scene.wait('create_update_text').on(['message:text', 'message:file'], async (ctx) => {
-  const photo = ctx.message?.photo?.at(-1)
   const caption = ctx.message?.caption
   const splitData = caption?.split('\n')
   const name = splitData?.[0]?.split('Nomi:')?.[1]?.trim()
@@ -178,16 +289,17 @@ scene.wait('create_update_text').on(['message:text', 'message:file'], async (ctx
     const file = await ctx.getFile()
     const filePath = file.file_path
     const telegramFileUrl = `https://api.telegram.org/file/bot${env.TOKEN}/${filePath}`
+    const imageName = randomBytes(16).toString('hex') + '.png'
 
     if (ctx.session.command === 'create') {
-      uploadImage(telegramFileUrl, photo?.file_unique_id! + '.png')
+      await uploadImage(telegramFileUrl, imageName)
 
       await Model.Product.create({
         id: Date.now(),
         name,
         description,
         price: +price!,
-        image: photo?.file_unique_id! + '.png',
+        image: imageName,
         categoryId: ctx.session.categoryId,
       })
 
@@ -197,7 +309,7 @@ scene.wait('create_update_text').on(['message:text', 'message:file'], async (ctx
 
       deleteImage(product?.image)
 
-      uploadImage(telegramFileUrl, photo?.file_unique_id! + '.png')
+      await uploadImage(telegramFileUrl, imageName)
 
       await Model.Product.updateOne(
         { id: ctx.session.productId },
@@ -205,7 +317,7 @@ scene.wait('create_update_text').on(['message:text', 'message:file'], async (ctx
           name,
           description,
           price: +price!,
-          image: photo?.file_unique_id! + '.png',
+          image: imageName,
           categoryId: ctx.session.categoryId,
         },
       )
