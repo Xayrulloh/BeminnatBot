@@ -9,6 +9,7 @@ import { autoRetry } from '@grammyjs/auto-retry'
 import { keyboardMapper } from '#helper/keyboardMapper'
 import customKFunction from '#keyboard/custom'
 import { UserKeyboard } from '#helper/putUserKeyboard'
+import { ADMIN_USER_ID } from '#utils/constants'
 
 const bot = new Bot<BotContext>(env.TOKEN)
 
@@ -34,7 +35,7 @@ bot.use(scenes)
 
 // Commands
 bot.command('start', async (ctx) => {
-  if (ctx.user.userId === 1151533771) {
+  if (ctx.user.userId === ADMIN_USER_ID) {
     ctx.reply('Xush kelibsiz!', {
       reply_markup: {
         keyboard: customKFunction(2, ...UserKeyboard(ctx.user.userId)).build(),

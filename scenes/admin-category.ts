@@ -5,12 +5,13 @@ import Model from '#config/database'
 import inlineKFunction from '#keyboard/inline'
 import { messageDeleter } from '#helper/messageDeleter'
 import { exitScene } from '#helper/exitScene'
+import { ADMIN_USER_ID } from '#utils/constants'
 
 const scene = new Scene<BotContext>('AdminCategory')
 
 // show and decide rather to delete, update or create
 scene.step(async (ctx) => {
-  if (ctx.user.userId != 1151533771) {
+  if (ctx.user.userId != ADMIN_USER_ID) {
     return ctx.scene.exit()
   }
 

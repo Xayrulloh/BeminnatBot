@@ -9,13 +9,13 @@ import customKFunction from '#keyboard/custom'
 import inlineKFunction from '#keyboard/inline'
 import { env } from '#utils/env'
 import { deleteImage, uploadImage } from '#helper/cloudflare'
-import { PER_PAGE } from '#utils/constants'
+import { ADMIN_USER_ID, PER_PAGE } from '#utils/constants'
 
 const scene = new Scene<BotContext>('AdminProduct')
 
 // show categories
 scene.step(async (ctx) => {
-  if (ctx.user.userId != 1151533771) {
+  if (ctx.user.userId != ADMIN_USER_ID) {
     return ctx.scene.exit()
   }
 

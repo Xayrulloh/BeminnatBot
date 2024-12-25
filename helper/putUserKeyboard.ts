@@ -1,5 +1,5 @@
-import { ADMIN_MAIN_KEYBOARD, MAIN_KEYBOARD } from '#utils/constants'
+import { ADMIN_MAIN_KEYBOARD, ADMIN_USER_ID, MAIN_KEYBOARD } from '#utils/constants'
 
 export const UserKeyboard = (userId: number) => {
-  return userId === 1151533771 ? ADMIN_MAIN_KEYBOARD : MAIN_KEYBOARD
+  return userId === ADMIN_USER_ID ? ADMIN_MAIN_KEYBOARD : MAIN_KEYBOARD
 }
