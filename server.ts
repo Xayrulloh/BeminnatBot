@@ -34,7 +34,7 @@ bot.use(scenes)
 
 // Commands
 bot.command('start', async (ctx) => {
-  if (ctx.user.userId === 1151533772) {
+  if (ctx.user.userId === 1151533771) {
     ctx.reply('Xush kelibsiz!', {
       reply_markup: {
         keyboard: customKFunction(2, ...UserKeyboard(ctx.user.userId)).build(),
@@ -57,6 +57,10 @@ bot.command('address', async (ctx) => {
 
 bot.command('admin_category', async (ctx) => {
   await ctx.scenes.enter('AdminCategory')
+})
+
+bot.command('admin_product', async (ctx) => {
+  await ctx.scenes.enter('AdminProduct')
 })
 
 bot.on('message:text', async (ctx) => {

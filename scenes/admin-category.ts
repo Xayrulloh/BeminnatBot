@@ -3,16 +3,14 @@ import { BotContext } from '#types/context'
 import { ICategory } from '#types/database'
 import Model from '#config/database'
 import inlineKFunction from '#keyboard/inline'
-import customKFunction from '#keyboard/custom'
 import { messageDeleter } from '#helper/messageDeleter'
-import { UserKeyboard } from '#helper/putUserKeyboard'
 import { exitScene } from '#helper/exitScene'
 
 const scene = new Scene<BotContext>('AdminCategory')
 
 // show and decide rather to delete, update or create
 scene.step(async (ctx) => {
-  if (ctx.user.userId != 1151533772) {
+  if (ctx.user.userId != 1151533771) {
     return ctx.scene.exit()
   }
 
@@ -98,9 +96,7 @@ scene.wait('category_name').on('message:text', async (ctx) => {
 
   if (ctx.session.command === 'create') {
     if (ctx.session.categories.find((c: ICategory) => c.name === textData)) {
-      const message = await ctx.reply('Bunday kategoriya mavjud. Iltimos boshqa nom bering')
-
-      ctx.session.messageIds.push(message.message_id)
+      ctx.reply('Bunday kategoriya mavjud. Iltimos boshqa nom bering')
     } else {
       await Model.Category.create({
         name: textData,

@@ -11,6 +11,7 @@ import address from './address'
 // import donate from './donate'
 // import hadith from './hadith'
 import adminCategory from './admin-category'
+import adminProduct from './admin-product'
 // import addHadith from './add-hadith'
 // import quran from './quran'
 // import feedback from './feedback'
@@ -25,6 +26,7 @@ export const scenes = new ScenesComposer<BotContext>(
   start,
   address,
   adminCategory,
+  adminProduct,
   // donate,
   // hadith,
   // source,

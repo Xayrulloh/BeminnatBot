@@ -15,7 +15,7 @@ export interface IAddress extends Document {
   name: string
 }
 
-export interface IProducts extends Document {
+export interface IProduct extends Document {
   id: number
   name: string
   description: string
@@ -29,7 +29,7 @@ export interface ICategory extends Document {
   name: string
 }
 
-export interface IOrders extends Document {
+export interface IOrder extends Document {
   id: number
   productId: number
   userId: number

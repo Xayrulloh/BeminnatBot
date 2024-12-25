@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { IAddress, ICategory, IOrders, IProducts, IUser } from '#types/database'
+import { IAddress, ICategory, IOrder, IProduct, IUser } from '#types/database'
 import { env } from '#utils/env'
 import { Color } from '#utils/enums'
 
@@ -52,7 +52,7 @@ const Address = new Schema(
   { versionKey: false },
 )
 
-const Products = new Schema(
+const Product = new Schema(
   {
     id: {
       required: true,
@@ -99,7 +99,7 @@ const Category = new Schema(
   { versionKey: false },
 )
 
-const Orders = new Schema(
+const Order = new Schema(
   {
     id: {
       required: true,
@@ -132,8 +132,8 @@ Address.index({ userId: 1, name: 1 }, { unique: true })
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
 mongoose.model<ICategory>('Category', Category)
-mongoose.model<IProducts>('Products', Products)
-mongoose.model<IOrders>('Orders', Orders)
+mongoose.model<IProduct>('Product', Product)
+mongoose.model<IOrder>('Order', Order)
 mongoose.set('strictQuery', false)
 
 mongoose
