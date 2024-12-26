@@ -1,20 +1,28 @@
-import { Scene } from "grammy-scenes";
-import { BotContext } from "#types/context";
-import Model from "#config/database";
-import { Keyboard } from "grammy";
-import customKFunction from "#keyboard/custom";
-import inlineKFunction from "#keyboard/inline";
-import { IAddress } from "#types/database";
-import { MAIN_KEYBOARD } from "#utils/constants";
+import { Scene } from 'grammy-scenes'
+import { BotContext } from '#types/context'
+import Model from '#config/database'
+import { Keyboard } from 'grammy'
+import customKFunction from '#keyboard/custom'
+import inlineKFunction from '#keyboard/inline'
+import { IAddress } from '#types/database'
+import { UserKeyboard } from '#helper/putUserKeyboard'
+import { exitScene } from '#helper/exitScene'
 
 const scene = new Scene<BotContext>('Address')
 
 // Initial
 scene.step(async (ctx) => {
-  const buttons = inlineKFunction(2, [{ view: "📍 Joyshuvlar ro'yxati", text: "get address" }, { view: "➕ Joylashuv qo'shish", text: "add address" }, { view: "🗑 Joylashuv o'chirish", text: "delete address" }])
+  const buttons = inlineKFunction(2, [
+    { view: "📍 Joyshuvlar ro'yxati", text: 'get address' },
+    { view: "➕ Joylashuv qo'shish", text: 'add address' },
+    { view: "🗑 Joylashuv o'chirish", text: 'delete address' },
+  ])
 
-  await ctx.reply('Quyidagilardan birini tanlang', { reply_markup: buttons }) // TODO: Clear buttons
-});
+  const message = await ctx.reply('Quyidagilardan birini tanlang', { reply_markup: buttons })
+
+  ctx.session.messageIds = [message.message_id]
+  ctx.session.chatId = ctx.chat?.id
+})
 
 // Create, Get and Delete
 scene.wait('crud').on('callback_query:data', async (ctx) => {
@@ -22,69 +30,68 @@ scene.wait('crud').on('callback_query:data', async (ctx) => {
 
   const inputData = ctx.update.callback_query.data
 
-  if (!["get address", "add address", "delete address"].includes(inputData)) {
-    await ctx.answerCallbackQuery("Iltimos quyidagilardan birini tanlang")
+  ctx.session.messageIds.push(ctx.update.callback_query?.message?.message_id)
+
+  if (!['get address', 'add address', 'delete address'].includes(inputData)) {
+    await ctx.answerCallbackQuery('Iltimos quyidagilardan birini tanlang')
   }
 
   ctx.session.command = inputData
 
-  await ctx.deleteMessage()
-
   const addresses = await Model.Address.find<IAddress>({
-    userId: ctx.user.userId
+    userId: ctx.user.userId,
   })
 
   // checking
-  if (!addresses.length && ["get address", "delete address"].includes(inputData)) {
-    ctx.reply("Sizda hali xech qanday joylashuv mavjud emas", {
-      reply_markup: {
-        keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-        resize_keyboard: true,
-      },
-      parse_mode: 'HTML',    
-    })
-
-    return ctx.scene.exit()
+  if (!addresses.length && ['get address', 'delete address'].includes(inputData)) {
+    return exitScene(ctx, 'Sizda hali xech qanday joylashuv mavjud emas')
   }
 
   // create
   if (inputData === 'add address') {
     if (addresses.length > 3) {
-      ctx.reply("Siz maksimal joylashuv miqdoriga yetdingiz\n\nJoyshlashuv kiritish uchun boshqa joylashuvingizni o'chirishingizni so'raymiz", {
+      return exitScene(
+        ctx,
+        "Siz maksimal joylashuv miqdoriga yetdingiz\n\nJoyshlashuv kiritish uchun boshqa joylashuvingizni o'chirishingizni so'raymiz",
+      )
+    } else {
+      ctx.session.locationNames = addresses.map((address) => address.name)
+
+      const message = await ctx.reply('Joylashuv nomini kiriting')
+
+      ctx.session.messageIds.push(message.message_id)
+    }
+  } else if (inputData === 'get address') {
+    // get
+    for (let i = 0; i < addresses.length; i++) {
+      const address = addresses[i]
+
+      await ctx.reply(`${i + 1}) ${address.name}`, {
         reply_markup: {
-          keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
+          keyboard: customKFunction(2, ...UserKeyboard(ctx.user.userId)).build(),
           resize_keyboard: true,
         },
-        parse_mode: 'HTML',    
+        parse_mode: 'HTML',
       })
 
-      return ctx.scene.exit()
-    } else {
-      ctx.session.locationNames = addresses.map(address => address.name)
-      ctx.reply("Joylashuv nomini kiriting")
+      await ctx.replyWithLocation(address.latitude, address.longitude)
     }
-  } else if (inputData === 'get address') { // get
-      for (const address of addresses) {
-        await ctx.reply(address.name, {
-          reply_markup: {
-            keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-            resize_keyboard: true,
-          },
-          parse_mode: 'HTML',    
-        })
-        await ctx.replyWithLocation(address.latitude, address.longitude);
-      } // TODO: put indexes 1) smth, 2) smth, 3) smth
 
-      ctx.scene.exit()
-
-  } else { // delete
-    const buttons = inlineKFunction(2, addresses.map(address => {
-      return { text: address.name, view: address.name }
-    }))
+    return ctx.scene.exit()
+  } else {
+    // delete
+    const buttons = inlineKFunction(
+      2,
+      addresses.map((address) => {
+        return { text: address.name, view: address.name }
+      }),
+    )
 
     ctx.session.deleteButtons = buttons
 
-    await ctx.reply("Qaysi birini o'chirishni xohlaysiz?", { reply_markup: buttons })
+    const message = await ctx.reply("Qaysi birini o'chirishni xohlaysiz?", { reply_markup: buttons })
+
+    ctx.session.messageIds.push(message.message_id)
   }
 
   ctx.scene.resume()
@@ -94,13 +101,28 @@ scene.wait('create_delete').on(['callback_query:data', 'message:text'], async (c
   const inlineData = ctx.update?.callback_query?.data
   const textData = ctx.message?.text
 
+  ctx.message?.message_id && ctx.session.messageIds.push(ctx.message?.message_id)
+  ctx.update.callback_query?.message?.message_id &&
+    ctx.session.messageIds.push(ctx.update.callback_query?.message?.message_id)
+
   // checking
-  if ((ctx.session.command === 'add address' && !textData && inlineData) || (ctx.session.command === 'add address' && textData && ctx.session.locationNames.includes(textData))) {
-    return ctx.reply("Joylashuv nomini kiriting")
+  if (
+    (ctx.session.command === 'add address' && !textData && inlineData) ||
+    (ctx.session.command === 'add address' && textData && ctx.session.locationNames.includes(textData))
+  ) {
+    const message = await ctx.reply('Joylashuv nomini kiriting')
+
+    ctx.session.messageIds.push(message.message_id)
+
+    return
   } else if (ctx.session.command === 'delete address' && textData && !inlineData) {
     await ctx.answerCallbackQuery()
 
-    await ctx.reply("Qaysi birini o'chirishni xohlaysiz?", { reply_markup: ctx.session.deleteButtons })
+    const message = await ctx.reply("Qaysi birini o'chirishni xohlaysiz?", { reply_markup: ctx.session.deleteButtons })
+
+    ctx.session.messageIds.push(message.message_id)
+
+    return
   }
 
   // delete
@@ -109,54 +131,38 @@ scene.wait('create_delete').on(['callback_query:data', 'message:text'], async (c
 
     await Model.Address.deleteOne({
       userId: ctx.user.userId,
-      name: inlineData
+      name: inlineData,
     })
 
-    ctx.reply("Joylashuv o'chirildi",  {
-      reply_markup: {
-        keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-        resize_keyboard: true,
-      },
-      parse_mode: 'HTML',    
-    })
-
-    return ctx.scene.exit()
+    return exitScene(ctx, "Joylashuv muvaffaqiyatli o'chirildi")
   } else {
     ctx.session.newLocationName = textData
 
-    const keyboard = new Keyboard()
-      .requestLocation("📍 Yangi joylashuv")
-      .resized()
-      .oneTime();
+    const keyboard = new Keyboard().requestLocation('📍 Yangi joylashuv').resized().oneTime()
 
-    ctx.reply("Joylashuvingizni jo'nating", {
+    const message = await ctx.reply("Joylashuvingizni jo'nating", {
       reply_markup: keyboard,
     })
+
+    ctx.session.messageIds.push(message.message_id)
   }
 
   ctx.scene.resume()
 })
 
 scene.wait('create').on('message:location', async (ctx) => {
+  const location = ctx.message.location
 
-  const location = ctx.message.location;
+  ctx.session.messageIds.push(ctx.message.message_id)
 
   await Model.Address.create<IAddress>({
     latitude: location.latitude,
     longitude: location.longitude,
     userId: ctx.user.userId,
-    name: ctx.session.newLocationName
+    name: ctx.session.newLocationName,
   })
 
-  await ctx.reply("Yangi joylashuv muvaffaqiyatli qo'shildi", {
-    reply_markup: {
-      keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-      resize_keyboard: true,
-    },
-    parse_mode: 'HTML',    
-  })
-
-  ctx.scene.exit()
+  return exitScene(ctx, "Yangi joylashuv muvaffaqiyatli qo'shildi")
 })
 
-export default scene;
+export default scene

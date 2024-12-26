@@ -1,10 +1,6 @@
 node_modules
 .env
 
-# storage files
-users.json
-translate/localStorage.json
-
 # MacOS behavior
 .DS_Store
 

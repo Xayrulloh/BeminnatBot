@@ -7,6 +7,8 @@ import { IUser } from '#types/database'
 export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   if (ctx.from?.is_bot) return
 
+  ctx.deleteMessage().catch(() => {})
+
   // Caching to memory
   const key = String(ctx.from?.id)
   let user = memoryStorage.read(key)
@@ -19,6 +21,7 @@ export async function authMiddleware(ctx: BotContext, next: NextFunction) {
 
   // finding user from db
   const userId = ctx.from?.id
+
   user = await Model.User.findOne<IUser>({ userId })
 
   if (!user) {

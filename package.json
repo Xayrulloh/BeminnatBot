@@ -5,12 +5,18 @@
   "main": "server.ts",
   "type": "commonjs",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register server.ts"
+    "prebuild": "rimraf dist",
+    "build": "pnpm run prebuild && tsc",
+    "start": "TS_NODE_BASEURL=./dist node -r tsconfig-paths/register --env-file=.env dist/server.js",
+    "start:dev": "tsc-watch --outDir ./dist --onSuccess 'pnpm start'",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx}\""
   },
   "author": "",
   "license": "MIT",
   "packageManager": "pnpm@9.12.2",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.717.0",
     "@grammyjs/auto-retry": "1.1.1",
     "axios": "1.5.0",
     "discord.js": "14.13.0",
@@ -27,6 +33,7 @@
     "@grammyjs/types": "3.3.0",
     "@types/node": "20.6.4",
     "prettier": "3.0.3",
+    "rimraf": "5.0.1",
     "tsc-watch": "6.0.4",
     "tsconfig-paths": "4.2.0",
     "typescript": "5.2.2"
