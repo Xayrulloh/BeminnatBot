@@ -74,11 +74,15 @@ scene.wait('category_name').on('message:text', async (ctx) => {
 
   const properties = [{ view: '🚪Chiqish', text: 'exit' }]
 
+  let messageText = 'Chiqish'
+
   if (products.length === PER_PAGE) {
+    messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
+
     properties.push({ view: '➡️ Keyingisi', text: 'next' })
   }
 
-  const message = await ctx.reply('Mahsulot', {
+  const message = await ctx.reply(messageText, {
     reply_markup: {
       ...inlineKFunction(2, properties),
     },
@@ -132,15 +136,21 @@ scene.wait('create_delete_update').on('callback_query:data', async (ctx) => {
 
       const properties = [{ view: '🚪Chiqish', text: 'exit' }]
 
+      let messageText = 'Chiqish'
+
       if (products.length === PER_PAGE * ctx.session.currPage) {
+        messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
+
         properties.push({ view: '➡️ Keyingisi', text: 'next' })
       }
 
       if (ctx.session.currPage > 1) {
+        messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
+
         properties.unshift({ view: '⬅️ Oldingisi', text: 'previous' })
       }
 
-      const message = await ctx.reply('Mahsulot', {
+      const message = await ctx.reply(messageText, {
         reply_markup: {
           ...inlineKFunction(2, properties),
         },
@@ -177,15 +187,21 @@ scene.wait('create_delete_update').on('callback_query:data', async (ctx) => {
 
       const properties = [{ view: '🚪Chiqish', text: 'exit' }]
 
+      let messageText = 'Chiqish'
+
       if (products.length === PER_PAGE * ctx.session.currPage) {
+        messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
+
         properties.push({ view: '➡️ Keyingisi', text: 'next' })
       }
 
       if (ctx.session.currPage > 1) {
+        messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
+
         properties.unshift({ view: '⬅️ Oldingisi', text: 'previous' })
       }
 
-      const message = await ctx.reply('Mahsulot', {
+      const message = await ctx.reply(messageText, {
         reply_markup: {
           ...inlineKFunction(2, properties),
         },
