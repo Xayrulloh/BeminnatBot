@@ -15,29 +15,24 @@ export interface IAddress extends Document {
   name: string
 }
 
-
-export interface IProducts extends Document {
-  id: number,
-  name: string,
+export interface IProduct extends Document {
+  id: number
+  name: string
   description: string
   image: string
-  price :number,
-  categoryId:number
+  price: number
+  categoryId: number
 }
-
 
 export interface ICategory extends Document {
-  id: number,
-  name: string,
-
+  id: number
+  name: string
 }
 
-
-
-export interface IOrders extends Document {
-  id: number,
-  productId:number
-  userId:number
-  status:boolean,
-  count:number
+export interface IOrder extends Document {
+  id: number
+  productId: number
+  userId: number
+  status: boolean
+  count: number
 }

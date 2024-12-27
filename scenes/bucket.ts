@@ -8,54 +8,43 @@ import { IOrders, IProducts } from '#types/database'
 const scene = new Scene<BotContext>('Bucket')
 
 // initial increment, decrement or delete
-scene.step(async(ctx)=>{
-    const orders = await Model.Orders.find<IOrders>({
-        userId:ctx.user.id,
-        status:false
+scene.step(async (ctx) => {
+  const orders = await Model.Orders.find<IOrders>({
+    userId: ctx.user.id,
+    status: false,
+  })
+
+  if (!orders.length) {
+    await ctx.reply('Productlar topilmadi')
+
+    return ctx.scene.exit()
+  }
+
+  const productIds = orders.map((order) => order.productId)
+
+  const products = await Model.Products.find<IProducts>({
+    id: { $in: productIds },
+  })
+
+  const amount = products.reduce((acc, curr) => acc + curr.price, 0)
+
+  for (const product of products) {
+    const button = inlineKFunction(3, [
+      { view: '➕', text: 'increment' + product.id },
+      { view: '🗑', text: 'delete' + product.id },
+      { view: '➖', text: 'decrement' + product.id },
+    ])
+
+    await ctx.reply(product.name, {
+      reply_markup: {
+        ...button,
+        keyboard: customKFunction(1, `Umumiy narxi ${amount}\n\n Buyurtma berish ✅`).build(),
+      },
     })
-
-    if(!orders.length){
-        await ctx.reply("Productlar topilmadi")
-
-        return ctx.scene.exit()
-    }
-
-    const productIds = orders.map(order => order.productId)
-
-    const products = await Model.Products.find<IProducts>({
-        id: { $in : productIds}
-    })
-
-    const amount = products.reduce((acc, curr) => acc + curr.price, 0)
-
-    for (const product of products) {
-        const button = inlineKFunction(3, [
-            { view: "➕", text: 'increment'+product.id},
-            { view: "🗑", text: 'delete'+product.id },
-            {view:"➖",text:"decrement"+product.id}
-        ])
-
-        await ctx.reply(product.name, { reply_markup: {
-            ...button, 
-            keyboard: customKFunction(1, `Umumiy narxi ${amount}\n\n Buyurtma berish ✅`).build(),
-        } })
-    }
+  }
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 
+//
 
 // Initial
 // scene.step(async (ctx) => {
