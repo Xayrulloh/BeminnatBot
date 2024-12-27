@@ -1,6 +1,6 @@
 export const keyboardMapper = (text: string) => {
   const options: Record<string, string> = {
-    '📁 Kategoriyalar': 'Category',
+    '🛍 Market': 'Market',
     '📍 Joylashuvlar': 'Address',
     '🛒 Savat': 'Bucket',
     '🚚 Buyurtmalar': 'Order',

@@ -1,12 +1,19 @@
 {
-  "endOfLine": "auto",
+  "endOfLine": "lf",
   "proseWrap": "always",
-  "quoteProps": "consistent",
+  "quoteProps": "as-needed",
   "arrowParens": "always",
   "trailingComma": "all",
   "semi": false,
   "singleQuote": true,
-  "bracketSpacing": true,
+  "bracketSpacing": false,
   "bracketSameLine": false,
-  "printWidth": 120
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "htmlWhitespaceSensitivity": "strict",
+  "embeddedLanguageFormatting": "off",
+  "jsxSingleQuote": true,
+  "requirePragma": true,
+  "insertPragma": true
 }
