@@ -22,9 +22,10 @@ scene.step(async (ctx) => {
 
 // save to db
 scene.wait('the_end').on("message:contact", async (ctx) => {
-  const contact = ctx.message.contact;
+  const contact = ctx.message.contact
   const user = ctx.update.message?.from
 
+  console.log(contact.phone_number)
   await Model.User.create<IUser>({
     userId: user.id,
     userName: user.username || 'unknown',
