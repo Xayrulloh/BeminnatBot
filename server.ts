@@ -44,19 +44,19 @@ bot.command('start', async (ctx) => {
 })
 
 bot.command('address', async (ctx) => {
-  await ctx.scenes.enter('Address')
+  ctx.scenes.enter('Address')
 })
 
 bot.command('bucket', async (ctx) => {
- await ctx.scenes.enter('Bucket')
+  ctx.scenes.enter('Bucket')
 })
 
 bot.command('admin_category', async (ctx) => {
-  await ctx.scenes.enter('AdminCategory')
+  ctx.scenes.enter('AdminCategory')
 })
 
 bot.command('admin_product', async (ctx) => {
-  await ctx.scenes.enter('AdminProduct')
+  ctx.scenes.enter('AdminProduct')
 })
 
 bot.on('message:text', async (ctx) => {

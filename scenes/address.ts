@@ -16,7 +16,7 @@ scene.step(async (ctx) => {
     { view: "📍 Joyshuvlar ro'yxati", text: 'get address' },
     { view: "➕ Joylashuv qo'shish", text: 'add address' },
     { view: "🗑 Joylashuv o'chirish", text: 'delete address' },
-    {view :'🚪 Chiqish',text:'exit'}
+    { view: '🚪 Chiqish', text: 'exit' },
   ])
 
   const message = await ctx.reply('Quyidagilardan birini tanlang', { reply_markup: buttons })
@@ -33,7 +33,7 @@ scene.wait('crud').on('callback_query:data', async (ctx) => {
 
   ctx.session.messageIds.push(ctx.update.callback_query?.message?.message_id)
 
-  if (!['get address', 'add address', 'delete address','exit'].includes(inputData)) {
+  if (!['get address', 'add address', 'delete address', 'exit'].includes(inputData)) {
     await ctx.answerCallbackQuery('Iltimos quyidagilardan birini tanlang')
   }
 
@@ -100,7 +100,6 @@ scene.wait('crud').on('callback_query:data', async (ctx) => {
 
   ctx.scene.resume()
 })
-
 
 scene.wait('create_delete').on(['callback_query:data', 'message:text'], async (ctx) => {
   const inlineData = ctx.update?.callback_query?.data

@@ -3,9 +3,9 @@
     /* Projects */
     "incremental": true,
     /* Language and Environment */
-    "target": "ESNext",
+    "target": "es2016",
     /* Modules */
-    "module": "CommonJS",
+    "module": "commonjs",
     "rootDir": "./",
     "baseUrl": "./",
     /* Emit */

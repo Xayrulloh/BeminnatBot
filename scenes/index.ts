@@ -6,4 +6,4 @@ import bucket from './bucket'
 import adminCategory from './admin-category'
 import adminProduct from './admin-product'
 
-export const scenes = new ScenesComposer<BotContext>(start,address, adminCategory, adminProduct, bucket)
+export const scenes = new ScenesComposer<BotContext>(start, address, adminCategory, adminProduct, bucket)
