@@ -3,13 +3,13 @@ import { BotContext } from '#types/context'
 import Model from '#config/database'
 import customKFunction from '#keyboard/custom'
 import inlineKFunction from '#keyboard/inline'
-import { IOrders, IProducts } from '#types/database'
+import { IOrder, IProduct } from '#types/database'
 
 const scene = new Scene<BotContext>('Bucket')
 
 // initial increment, decrement or delete
 scene.step(async (ctx) => {
-  const orders = await Model.Orders.find<IOrders>({
+  const orders = await Model.Orders.find<IOrder>({
     userId: ctx.user.id,
     status: false,
   })
@@ -22,7 +22,7 @@ scene.step(async (ctx) => {
 
   const productIds = orders.map((order) => order.productId)
 
-  const products = await Model.Products.find<IProducts>({
+  const products = await Model.Products.find<IProduct>({
     id: { $in: productIds },
   })
 
@@ -42,168 +42,90 @@ scene.step(async (ctx) => {
       },
     })
   }
+  await ctx.reply('Iltimos, mahsulot tugmalaridan birini tanlang.');
+  
 })
 
-//
 
-// Initial
-// scene.step(async (ctx) => {
-//   const buttons = inlineKFunction(2, [
-//     { view: "Buyurtmalarni ko'rish", text: 'get orders' },
-//     { view: "➕ Buyurtmani  qo'shish", text: 'add orders'},
-//     {view:"➖ Buyurtmani o'chirish",text:"delete orders"}
-//   ])
 
-//   await ctx.reply('Quyidagilardan birini tanlang', { reply_markup: buttons }) // TODO: Clear buttons
-// })
+// Wait for user actions
+scene.wait('handleactions').on('callback_query', async (ctx) => {
+  if (!ctx.callbackQuery || !ctx.callbackQuery.data) {
+    await ctx.reply('Tugmani tanlang yoki /exit buyrug‘ini bering.');
+    return;
+  }
 
-// // Create, Get and Delete
-// scene.wait('crud').on('callback_query:data', async (ctx) => {
-//   await ctx.answerCallbackQuery()
+  const [action, productId] = ctx.callbackQuery.data.split(':');
 
-//   const inputData = ctx.update.callback_query.data
+  switch (action) {
+    case 'increment':
+      await handleIncrement(ctx , +productId);
+      break;
+    case 'decrement':
+      await handleDecrement(ctx, +productId);
+      break;
+    case 'delete':
+      await handleDelete(ctx, +productId);
+      break;
+    default:
+      await ctx.reply('Noma’lum amal');
+  }
 
-//   if (!['get orders', 'add orders', 'delete orders'].includes(inputData)) {
-//     await ctx.answerCallbackQuery('Iltimos quyidagilardan birini tanlang')
-//   }
+  // Stay in the same step to allow further actions
+  return ctx.scene.resume();
+});
 
-//   ctx.session.command = inputData
+// Increment function
+async function handleIncrement(ctx:any, productId:number) {
+  const order = await Model.Orders.findOne<IOrder>({
+    userId: ctx.user.id,
+    productId,
+    status: false,
+  });
 
-//   await ctx.deleteMessage()
+  if (order) {
+    order.count += 1;
+    await order.save();
+    await ctx.reply('Mahsulot miqdori oshirildi.');
+  } else {
+    await ctx.reply('Buyurtma topilmadi.');
+  }
+}
 
-//   const addresses = await Model.Address.find<IAddress>({
-//     userId: ctx.user.userId,
-//   })
+// Decrement function
+async function handleDecrement(ctx:any, productId:number) {
+  const order = await Model.Orders.findOne<IOrder>({
+    userId: ctx.user.id,
+    productId,
+    status: false,
+  });
 
-//   // checking
-//   if (!addresses.length && ['get address', 'delete address'].includes(inputData)) {
-//     ctx.reply('Sizda hali xech qanday joylashuv mavjud emas', {
-//       reply_markup: {
-//         keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-//         resize_keyboard: true,
-//       },
-//       parse_mode: 'HTML',
-//     })
+  if (order) {
+    if (order.count > 1) {
+      order.count -= 1;
+      await order.save();
+      await ctx.reply('Mahsulot miqdori kamaytirildi.');
+    } else {
+      await ctx.reply('Mahsulot miqdori minimum darajada.');
+    }
+  } else {
+    await ctx.reply('Buyurtma topilmadi.');
+  }
+}
 
-//     return ctx.scene.exit()
-//   }
+// Delete function
+async function handleDelete(ctx:any, productId:number) {
+  const result = await Model.Orders.deleteOne({
+    userId: ctx.user.id,
+    productId,
+    status: false,
+  });
 
-//   // create
-//   if (inputData === 'add address') {
-//     if (addresses.length > 3) {
-//       ctx.reply(
-//         "Siz maksimal joylashuv miqdoriga yetdingiz\n\nJoyshlashuv kiritish uchun boshqa joylashuvingizni o'chirishingizni so'raymiz",
-//         {
-//           reply_markup: {
-//             keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-//             resize_keyboard: true,
-//           },
-//           parse_mode: 'HTML',
-//         },
-//       )
+  if (result.deletedCount > 0) {
+    await ctx.reply('Mahsulot o‘chirildi.');
+  } else {
+    await ctx.reply('Buyurtma topilmadi.');
+  }
+}
 
-//       return ctx.scene.exit()
-//     } else {
-//       ctx.session.locationNames = addresses.map((address) => address.name)
-//       ctx.reply('Joylashuv nomini kiriting')
-//     }
-//   } else if (inputData === 'get address') {
-//     // get
-//     for (const address of addresses) {
-//       await ctx.reply(address.name, {
-//         reply_markup: {
-//           keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-//           resize_keyboard: true,
-//         },
-//         parse_mode: 'HTML',
-//       })
-//       await ctx.replyWithLocation(address.latitude, address.longitude)
-//     } // TODO: put indexes 1) smth, 2) smth, 3) smth
-
-//     ctx.scene.exit()
-//   } else {
-//     // delete
-//     const buttons = inlineKFunction(
-//       2,
-//       addresses.map((address) => {
-//         return { text: address.name, view: address.name }
-//       }),
-//     )
-
-//     ctx.session.deleteButtons = buttons
-
-//     await ctx.reply("Qaysi birini o'chirishni xohlaysiz?", { reply_markup: buttons })
-//   }
-
-//   ctx.scene.resume()
-// })
-
-// scene.wait('create_delete').on(['callback_query:data', 'message:text'], async (ctx) => {
-//   const inlineData = ctx.update?.callback_query?.data
-//   const textData = ctx.message?.text
-
-//   // checking
-//   if (
-//     (ctx.session.command === 'add address' && !textData && inlineData) ||
-//     (ctx.session.command === 'add address' && textData && ctx.session.locationNames.includes(textData))
-//   ) {
-//     return ctx.reply('Joylashuv nomini kiriting')
-//   } else if (ctx.session.command === 'delete address' && textData && !inlineData) {
-//     await ctx.answerCallbackQuery()
-
-//     await ctx.reply("Qaysi birini o'chirishni xohlaysiz?", { reply_markup: ctx.session.deleteButtons })
-//   }
-
-//   // delete
-//   if (ctx.session.command === 'delete address') {
-//     await ctx.answerCallbackQuery()
-
-//     await Model.Address.deleteOne({
-//       userId: ctx.user.userId,
-//       name: inlineData,
-//     })
-
-//     ctx.reply("Joylashuv o'chirildi", {
-//       reply_markup: {
-//         keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-//         resize_keyboard: true,
-//       },
-//       parse_mode: 'HTML',
-//     })
-
-//     return ctx.scene.exit()
-//   } else {
-//     ctx.session.newLocationName = textData
-
-//     const keyboard = new Keyboard().requestLocation('📍 Yangi joylashuv').resized().oneTime()
-
-//     ctx.reply("Joylashuvingizni jo'nating", {
-//       reply_markup: keyboard,
-//     })
-//   }
-
-//   ctx.scene.resume()
-// })
-
-// scene.wait('create').on('message:location', async (ctx) => {
-//   const location = ctx.message.location
-
-//   await Model.Address.create<IAddress>({
-//     latitude: location.latitude,
-//     longitude: location.longitude,
-//     userId: ctx.user.userId,
-//     name: ctx.session.newLocationName,
-//   })
-
-//   await ctx.reply("Yangi joylashuv muvaffaqiyatli qo'shildi", {
-//     reply_markup: {
-//       keyboard: customKFunction(2, ...MAIN_KEYBOARD).build(),
-//       resize_keyboard: true,
-//     },
-//     parse_mode: 'HTML',
-//   })
-
-//   ctx.scene.exit()
-// })
-
-export default scene
+export default scene;

@@ -32,6 +32,10 @@ scene.step(async (ctx) => {
         view: '✏️ Yangilash',
         text: `update_${category.id}`,
       },
+      {
+        view:'🚪 Chiqish',
+        text:`exit_${category.id}`
+      }
     ])
 
     const message = await ctx.reply(`${category.name}`, { reply_markup: { ...buttons, remove_keyboard: true } })
@@ -57,7 +61,7 @@ scene.wait('delete_add_update').on('callback_query:data', async (ctx) => {
   ctx.session.command = inputData.split('_')[0]
   ctx.session.categoryId = inputData.split('_')[1]
 
-  if (!['delete', 'update', 'create'].includes(ctx.session.command)) {
+  if (!['delete', 'update', 'create','exit'].includes(ctx.session.command)) {
     await ctx.answerCallbackQuery('Iltimos quyidagilardan birini tanlang')
   }
 
@@ -86,6 +90,9 @@ scene.wait('delete_add_update').on('callback_query:data', async (ctx) => {
     await Model.Category.deleteOne({ id: ctx.session.categoryId })
 
     return exitScene(ctx, "Kategoriya o'chirildi")
+  }else if(ctx.session.command==='exit'){
+    return exitScene(ctx, "Asosiy menuga o'tildi")
+
   }
 
   ctx.scene.resume()
