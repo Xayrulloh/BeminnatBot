@@ -7,8 +7,8 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "pnpm run prebuild && tsc",
-    "start": "TS_NODE_BASEURL=./dist node -r tsconfig-paths/register --env-file=.env dist/server.js",
-    "start:dev": "tsc-watch --outDir ./dist --onSuccess 'pnpm start'",
+    "start": "ts-node -r tsconfig-paths/register server.ts",
+    "start:dev": "npx tsx watch server.ts",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx}\""
   },
