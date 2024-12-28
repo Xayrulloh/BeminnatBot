@@ -64,6 +64,9 @@ bot.command('admin_product', async (ctx) => {
   await ctx.scenes.enter('AdminProduct')
 })
 
+bot.command('order',async(ctx)=>{
+  await ctx.scenes.enter('order')
+})
 bot.on('message:text', async (ctx) => {
   const mappedScene = keyboardMapper(ctx.message.text)
 

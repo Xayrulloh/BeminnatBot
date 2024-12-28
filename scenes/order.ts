@@ -7,7 +7,8 @@ import { exitScene } from '#helper/exitScene';
 import inlineKFunction from '#keyboard/inline';
 import { env } from 'process';
 
-const scene = new Scene<BotContext>('Order');
+const scene = new Scene<BotContext>('order');
+
 
 scene.step(async (ctx) => {
     ctx.session.currPage = 1;
@@ -32,44 +33,58 @@ scene.step(async (ctx) => {
             ctx.session.messageIds.push(message.message_id)
         }
     
-    //     const properties = [
-    //     { view: "➕ Yangi maxsulot qo'shish", text: 'create' },
-    //     { view: '◀️ Chiqish', text: 'exit' },
-    //     ]
-    // //  console.log(properties)
-    //     if (products.length === PER_PAGE) {
-    //     properties.push({ view: '➡️ Keyingisi', text: 'next' })
-    //     }
+        const properties = [
+        { view: "➕ Yangi maxsulot qo'shish", text: 'create' },
+        { view: '◀️ Chiqish', text: 'exit' }
+        ]
+    //  console.log(properties)
+        if (products.length === PER_PAGE) {
+        properties.push({ view: '➡️ Keyingisi', text: 'next' })
+        }
     
-    //     const message = await ctx.reply("Yangi mahsulot qo'shishni xohlaysizmi?", {
-    //     reply_markup: {
-    //         ...inlineKFunction(2, properties),
-    //     },
-    //     })
+        const message = await ctx.reply("Yangi mahsulot qo'shishni xohlaysizmi?", {
+        reply_markup: {
+            ...inlineKFunction(2, properties),
+        },
+        })
     
-    //     ctx.session.messageIds.push(message.message_id)
+        ctx.session.messageIds.push(message.message_id)
     
         ctx.scene.resume()
     } else {
-        exitScene(ctx, "Sizda hechqanday buyurtma mavjud emas")
+       return  exitScene(ctx, "Sizda hechqanday buyurtma mavjud emas")
     }
 });
 
-// Middleware for pagination
-// scene.wait(async (ctx, next) => {
-//     const callbackData = ctx.update?.callback_query?.data;
 
-//     if (callbackData === 'next_page') {
-//         ctx.session.currPage = (ctx.session.currPage || 1) + 1; // Increment page
-//         await ctx.answerCallbackQuery(); // Acknowledge callback
-//         return await ctx.scenes.enter('Orders'); // Restart scene
-//     } else if (callbackData === 'prev_page') {
-//         ctx.session.currPage = Math.max((ctx.session.currPage || 1) - 1, 1); // Decrement page
-//         await ctx.answerCallbackQuery(); // Acknowledge callback
-//         return await ctx.scenes.enter('Orders'); // Restart scene
-//     }
+//  Middleware for paginationscene
 
-//     await next(); // Proceed to the next handler
-// });
+scene.wait("pagination").on("callback_query:data", async (ctx, next) => {
+    try {
+        const callbackData = ctx.update.callback_query?.data;
+
+        switch (callbackData) {
+            case 'next_page':
+                ctx.session.currPage = (ctx.session.currPage || 1) + 1; // Increment page
+                await ctx.answerCallbackQuery(); // Acknowledge callback
+                return await ctx.scenes.enter('order'); // Restart scene
+            case 'prev_page':
+                ctx.session.currPage = Math.max((ctx.session.currPage || 1) - 1, 1); // Decrement page
+                await ctx.answerCallbackQuery(); // Acknowledge callback
+                return await ctx.scenes.enter('order'); // Restart scene
+            default:
+                console.warn(`Unexpected callback data: ${callbackData}`);
+                await ctx.answerCallbackQuery({ text: 'Invalid action.', show_alert: true });
+                return;
+        }
+    } catch (error) {
+        console.error('Error in pagination middleware:', error);
+        await ctx.answerCallbackQuery({ text: 'Xatolik yuz berdi.', show_alert: true });
+    }
+
+    // Proceed to the next handler if no early return
+    await next();
+
+});
 
 export default scene;
