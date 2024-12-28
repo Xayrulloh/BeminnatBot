@@ -119,7 +119,7 @@ const Order = new Schema(
       required: true,
       type: Boolean,
     },
-    count: {
+    quantity: {
       required: true,
       type: Number,
     },

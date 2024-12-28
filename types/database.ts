@@ -34,5 +34,5 @@ export interface IOrder extends Document {
   productId: number
   userId: number
   status: boolean
-  count: number
+  quantity: number
 }
