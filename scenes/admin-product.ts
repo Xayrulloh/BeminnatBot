@@ -242,7 +242,13 @@ scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
   const inlineData = ctx.update?.callback_query?.data
   const textData = ctx.message?.text
 
-  const product = await Model.Product.findOne<IProduct>({ $or: [{ id: inlineData }, { name: { $regex: '.*' + textData + '.*', $options: 'i' } }, {description: { $regex: '.*' + textData + '.*', $options: 'i' }}] }).limit(PER_PAGE)
+  const product = await Model.Product.findOne<IProduct>({
+    $or: [
+      { id: inlineData },
+      { name: { $regex: '.*' + textData + '.*', $options: 'i' } },
+      { description: { $regex: '.*' + textData + '.*', $options: 'i' } },
+    ],
+  }).limit(PER_PAGE)
 
   if (!product) {
     return exitScene(ctx, "Bunday maxsulot mavjud emas\n\n Asosiy menuga o'tildi")
