@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-import { IAddress, ICategory, IOrder, IProduct, IUser } from '#types/database'
+import { IAddress, IOrder, IProduct, IUser, IWaybill } from '#types/database'
 import { env } from '#utils/env'
 import { Color } from '#utils/enums'
 
@@ -20,10 +20,6 @@ const User = new Schema(
     phoneNumber: {
       required: true,
       type: Number,
-    },
-    deletedAt: {
-      type: Date,
-      default: null,
     },
   },
   { versionKey: false },
@@ -58,7 +54,6 @@ const Product = new Schema(
       required: true,
       type: Number,
     },
-
     name: {
       required: true,
       type: String,
@@ -75,25 +70,10 @@ const Product = new Schema(
       required: true,
       type: Number,
     },
-    categoryId: {
-      required: true,
-      type: Number,
-      ref: 'Category',
-    },
-  },
-  { versionKey: false },
-)
-
-const Category = new Schema(
-  {
-    id: {
-      required: true,
-      type: Number,
-    },
-    name: {
+    type: {
       required: true,
       type: String,
-      unique: true,
+      enum: Object.values(['quantity', 'weight']),
     },
   },
   { versionKey: false },
@@ -120,6 +100,24 @@ const Order = new Schema(
       type: Boolean,
     },
     quantity: {
+      required: false,
+      type: Number,
+    },
+    weight: {
+      required: false,
+      type: Number,
+    },
+    isDelivered: {
+      required: true,
+      type: Boolean,
+    },
+  },
+  { versionKey: false },
+)
+
+const Waybill = new Schema(
+  {
+    price: {
       required: true,
       type: Number,
     },
@@ -131,9 +129,9 @@ Address.index({ userId: 1, name: 1 }, { unique: true })
 
 mongoose.model<IUser>('User', User)
 mongoose.model<IAddress>('Address', Address)
-mongoose.model<ICategory>('Category', Category)
 mongoose.model<IProduct>('Product', Product)
 mongoose.model<IOrder>('Order', Order)
+mongoose.model<IWaybill>('Waybill', Waybill)
 mongoose.set('strictQuery', false)
 
 mongoose

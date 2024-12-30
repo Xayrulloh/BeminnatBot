@@ -5,7 +5,6 @@ export interface IUser extends Document {
   userName?: string
   name: string
   phoneNumber: number
-  deletedAt: Date | null
 }
 
 export interface IAddress extends Document {
@@ -21,12 +20,7 @@ export interface IProduct extends Document {
   description: string
   image: string
   price: number
-  categoryId: number
-}
-
-export interface ICategory extends Document {
-  id: number
-  name: string
+  type: 'quantity' | 'weight'
 }
 
 export interface IOrder extends Document {
@@ -34,5 +28,11 @@ export interface IOrder extends Document {
   productId: number
   userId: number
   status: boolean
-  quantity: number
+  quantity?: number
+  weight?: number
+  isDelivered: boolean
+}
+
+export interface IWaybill extends Document {
+  price: number
 }

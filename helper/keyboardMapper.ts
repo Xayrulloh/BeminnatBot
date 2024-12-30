@@ -4,9 +4,10 @@ export const keyboardMapper = (text: string) => {
     '📍 Joylashuvlar': 'Address',
     '🛒 Savat': 'Bucket',
     '🚚 Buyurtmalar': 'Order',
-    '📁 Kategoriya': 'AdminCategory',
-    // '📍 Joylashuv': 'AdminAddress',
+    '📍 Joylashuv': 'AdminAddress',
     '🛍️ Mahsulot': 'AdminProduct',
+    '🚚 Buyurtma': 'AdminOrder',
+    '💲 Yetkazib berish narxi': 'AdminWaybill',
   }
 
   return options[text]
