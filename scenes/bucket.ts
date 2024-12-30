@@ -91,7 +91,6 @@ scene.wait('main').on(['callback_query:data', 'message:text'], async (ctx) => {
 
   if (textData) {
     if (textData === 'Buyurtma berish ✅') {
-
       // notify admin
       // ----------------
       // users
@@ -113,10 +112,10 @@ scene.wait('main').on(['callback_query:data', 'message:text'], async (ctx) => {
 
       for (let key in ctx.session.orderObj) {
         if (key !== orderId) {
-          ctx.session.amount += ctx.session.productObj[ctx.session.orderObj[key].productId].price * ctx.session.orderObj[key].quantity
+          ctx.session.amount +=
+            ctx.session.productObj[ctx.session.orderObj[key].productId].price * ctx.session.orderObj[key].quantity
         }
       }
-
     } else {
       const buttons = inlineKFunction(3, [
         { view: '➕', text: `increment_${orderId}` },
@@ -163,7 +162,6 @@ scene.wait('main').on(['callback_query:data', 'message:text'], async (ctx) => {
 
         ctx.session.amount = ctx.session.amount - ctx.session.productObj[ctx.session.orderObj[orderId].productId].price
       }
-
     }
 
     await ctx.api.deleteMessage(ctx.session.chatId, ctx.session.amountMessageId)
