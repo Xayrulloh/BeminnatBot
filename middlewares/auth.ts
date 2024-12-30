@@ -7,7 +7,11 @@ import { IUser } from '#types/database'
 export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   if (ctx.from?.is_bot) return
 
-  ctx.deleteMessage().catch(() => {})
+  const inlineData = ctx.update?.callback_query?.data
+
+  if (!['decrement', 'increment'].includes(inlineData?.split('_')?.[0] || '')) {
+    ctx.deleteMessage().catch(() => {})
+  }
 
   // Caching to memory
   const key = String(ctx.from?.id)

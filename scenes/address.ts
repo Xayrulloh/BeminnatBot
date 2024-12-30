@@ -16,6 +16,7 @@ scene.step(async (ctx) => {
     { view: "📍 Joyshuvlar ro'yxati", text: 'get address' },
     { view: "➕ Joylashuv qo'shish", text: 'add address' },
     { view: "🗑 Joylashuv o'chirish", text: 'delete address' },
+    { view: '🚪 Chiqish', text: 'exit' },
   ])
 
   const message = await ctx.reply('Quyidagilardan birini tanlang', { reply_markup: buttons })
@@ -24,7 +25,7 @@ scene.step(async (ctx) => {
   ctx.session.chatId = ctx.chat?.id
 })
 
-// Create, Get and Delete
+// Create, Get, Delete and Exit
 scene.wait('crud').on('callback_query:data', async (ctx) => {
   await ctx.answerCallbackQuery()
 
@@ -32,7 +33,7 @@ scene.wait('crud').on('callback_query:data', async (ctx) => {
 
   ctx.session.messageIds.push(ctx.update.callback_query?.message?.message_id)
 
-  if (!['get address', 'add address', 'delete address'].includes(inputData)) {
+  if (!['get address', 'add address', 'delete address', 'exit'].includes(inputData)) {
     await ctx.answerCallbackQuery('Iltimos quyidagilardan birini tanlang')
   }
 
@@ -42,6 +43,9 @@ scene.wait('crud').on('callback_query:data', async (ctx) => {
     userId: ctx.user.userId,
   })
 
+  if (inputData === 'exit') {
+    return exitScene(ctx, "Asosiy menuga o'tildi")
+  }
   // checking
   if (!addresses.length && ['get address', 'delete address'].includes(inputData)) {
     return exitScene(ctx, 'Sizda hali xech qanday joylashuv mavjud emas')

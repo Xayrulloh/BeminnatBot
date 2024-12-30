@@ -35,33 +35,28 @@ bot.use(scenes)
 
 // Commands
 bot.command('start', async (ctx) => {
-  if (ctx.user.userId === ADMIN_USER_ID) {
-    ctx.reply('Xush kelibsiz!', {
-      reply_markup: {
-        keyboard: customKFunction(2, ...UserKeyboard(ctx.user.userId)).build(),
-        resize_keyboard: true,
-      },
-    })
-  } else {
-    ctx.reply('Xush kelibsiz!', {
-      reply_markup: {
-        keyboard: customKFunction(2, ...UserKeyboard(ctx.user.userId)).build(),
-        resize_keyboard: true,
-      },
-    })
-  }
+  ctx.reply('Xush kelibsiz!', {
+    reply_markup: {
+      keyboard: customKFunction(2, ...UserKeyboard(ctx.user.userId)).build(),
+      resize_keyboard: true,
+    },
+  })
 })
 
 bot.command('address', async (ctx) => {
   ctx.scenes.enter('Address')
 })
 
+bot.command('bucket', async (ctx) => {
+  ctx.scenes.enter('Bucket')
+})
+
 bot.command('admin_category', async (ctx) => {
-  await ctx.scenes.enter('AdminCategory')
+  ctx.scenes.enter('AdminCategory')
 })
 
 bot.command('admin_product', async (ctx) => {
-  await ctx.scenes.enter('AdminProduct')
+  ctx.scenes.enter('AdminProduct')
 })
 
 bot.on('message:text', async (ctx) => {

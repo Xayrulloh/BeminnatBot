@@ -1,4 +1,4 @@
 export const PER_PAGE = 10
 export const MAIN_KEYBOARD = ['🛍 Market', '📍 Joylashuvlar', '🛒 Savat', '🚚 Buyurtmalar']
 export const ADMIN_MAIN_KEYBOARD = ['📁 Kategoriya', '🛍️ Mahsulot']
-export const ADMIN_USER_ID = 1151533771
+export const ADMIN_USER_ID = 11515337711
