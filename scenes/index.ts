@@ -4,6 +4,7 @@ import start from './start'
 import address from './address'
 // import bucket from './bucket'
 import adminProduct from './admin-product'
+import adminAddress from './admin-address'
 import market from './market'
 
-export const scenes = new ScenesComposer<BotContext>(start, address, adminProduct, market)
+export const scenes = new ScenesComposer<BotContext>(start, address, adminProduct, market, adminAddress)
