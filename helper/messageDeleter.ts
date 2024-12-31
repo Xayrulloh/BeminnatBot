@@ -9,4 +9,6 @@ export const messageDeleter = async (ctx: SceneFlavoredContext<BotContext, undef
       console.log('🚀 ~ error:', error)
     }
   }
+
+  ctx.session.messageIds = []
 }

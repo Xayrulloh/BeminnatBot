@@ -1,250 +1,265 @@
-// import { Scene } from 'grammy-scenes'
-// import { BotContext } from '#types/context'
-// import { ICategory, IOrder, IProduct } from '#types/database'
-// import Model from '#config/database'
-// import { messageDeleter } from '#helper/messageDeleter'
-// import { exitScene } from '#helper/exitScene'
-// import customKFunction from '#keyboard/custom'
-// import inlineKFunction from '#keyboard/inline'
-// import { env } from '#utils/env'
-// import { PER_PAGE } from '#utils/constants'
-
-// const scene = new Scene<BotContext>('Market')
-
-// // show categories
-// scene.step(async (ctx) => {
-//   ctx.session.messageIds = [ctx.update.message?.message_id]
-//   ctx.session.chatId = ctx.chat?.id
-
-//   const categories = await Model.Category.find<ICategory>()
-
-//   ctx.session.categories = categories
-
-//   if (!categories.length) {
-//     return exitScene(ctx, 'Afsuski xech qanday kategoriya mavjud emas 😔')
-//   }
-
-//   const message = await ctx.reply('Quyidagi kategoriyalardan birini tanlang', {
-//     reply_markup: {
-//       keyboard: customKFunction(3, ...categories.map((c) => c.name)).build(),
-//       resize_keyboard: true,
-//     },
-//   })
-
-//   ctx.session.messageIds.push(message.message_id)
-
-//   ctx.session.currPage = 1
-// })
-
-// // take which category and show products
-// scene.wait('category_name').on('message:text', async (ctx) => {
-//   const categoryName = ctx.message?.text
-
-//   // check if category exists
-//   if (!ctx.session.categories.find((c: ICategory) => c.name === categoryName)) {
-//     return ctx.reply('Bunday kategoriya mavjud emas\n\nQuyidagi kategoriyalardan birini tanlang')
-//   }
-
-//   ctx.session.categoryId = ctx.session.categories.find((c: ICategory) => c.name === categoryName)?.id
-
-//   await messageDeleter(ctx)
-
-//   const products = await Model.Product.find<IProduct>({
-//     categoryId: ctx.session.categoryId,
-//   })
-//     .sort({ id: -1 })
-//     .skip((ctx.session.currPage - 1) * PER_PAGE)
-//     .limit(PER_PAGE)
-
-//   ctx.session.productIds = products.map((p: IProduct) => p.id)
-
-//   ctx.session.messageIds = []
-
-//   // [product, with buttons [add]]
-//   for (const product of products) {
-//     const buttons = inlineKFunction(1, [{ view: "➕ Savatga qo'shish", text: `add_${product.id}` }])
-
-//     const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${product.image}`, {
-//       reply_markup: buttons,
-//       caption: `Nomi: ${product.name}\nMa\'lumoti: ${product.description}\nNarxi: ${product.price}`,
-//     })
-
-//     ctx.session.messageIds.push(message.message_id)
-//   }
-
-//   const properties = [{ view: '🚪Chiqish', text: 'exit' }]
-
-//   let messageText = 'Chiqish'
-
-//   if (products.length === PER_PAGE) {
-//     messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
-
-//     properties.push({ view: '➡️ Keyingisi', text: 'next' })
-//   }
-
-//   const message = await ctx.reply(messageText, {
-//     reply_markup: {
-//       ...inlineKFunction(2, properties),
-//     },
-//   })
-
-//   ctx.session.messageIds.push(message.message_id)
-
-//   ctx.scene.resume()
-// })
-
-// // decide what to do (create, delete, update)
-// scene.wait('create_delete_update').on('callback_query:data', async (ctx) => {
-//   const inlineData = ctx.update?.callback_query?.data
-
-//   const command = inlineData?.split('_')[0]
-//   const productId = inlineData?.split('_')[1]
-
-//   // check
-//   if (!['add', 'exit', 'next', 'previous'].includes(command)) {
-//     return await ctx.answerCallbackQuery()
-//   }
-
-//   if (['next', 'previous'].includes(command)) {
-//     if (command === 'next') {
-//       ctx.session.currPage += 1
-
-//       await messageDeleter(ctx)
-
-//       const products = await Model.Product.find<IProduct>({
-//         categoryId: ctx.session.categoryId,
-//       })
-//         .sort({ id: -1 })
-//         .skip((ctx.session.currPage - 1) * PER_PAGE)
-//         .limit(PER_PAGE)
-
-//       ctx.session.productIds = products.map((p: IProduct) => p.id)
-
-//       ctx.session.messageIds = []
-
-//       // [product, with buttons [add]]
-//       for (const product of products) {
-//         const buttons = inlineKFunction(1, [{ view: "➕ Savatga qo'shish", text: `add_${product.id}` }])
-
-//         const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${product.image}`, {
-//           reply_markup: buttons,
-//           caption: `Nomi: ${product.name}\nMa\'lumoti: ${product.description}\nNarxi: ${product.price}`,
-//         })
-
-//         ctx.session.messageIds.push(message.message_id)
-//       }
-
-//       const properties = [{ view: '🚪Chiqish', text: 'exit' }]
-
-//       let messageText = 'Chiqish'
-
-//       if (products.length === PER_PAGE * ctx.session.currPage) {
-//         messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
-
-//         properties.push({ view: '➡️ Keyingisi', text: 'next' })
-//       }
-
-//       if (ctx.session.currPage > 1) {
-//         messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
-
-//         properties.unshift({ view: '⬅️ Oldingisi', text: 'previous' })
-//       }
-
-//       const message = await ctx.reply(messageText, {
-//         reply_markup: {
-//           ...inlineKFunction(2, properties),
-//         },
-//       })
-
-//       ctx.session.messageIds.push(message.message_id)
-//     } else if (command === 'previous') {
-//       ctx.session.currPage -= 1
-
-//       await messageDeleter(ctx)
-
-//       const products = await Model.Product.find<IProduct>({
-//         categoryId: ctx.session.categoryId,
-//       })
-//         .sort({ id: -1 })
-//         .skip((ctx.session.currPage - 1) * PER_PAGE)
-//         .limit(PER_PAGE)
-
-//       ctx.session.productIds = products.map((p: IProduct) => p.id)
-
-//       ctx.session.messageIds = []
-
-//       // [product, with buttons [add]]
-//       for (const product of products) {
-//         const buttons = inlineKFunction(1, [{ view: "➕ Savatga qo'shish", text: `add_${product.id}` }])
-
-//         const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${product.image}`, {
-//           reply_markup: buttons,
-//           caption: `Nomi: ${product.name}\nMa\'lumoti: ${product.description}\nNarxi: ${product.price}`,
-//         })
-
-//         ctx.session.messageIds.push(message.message_id)
-//       }
-
-//       const properties = [{ view: '🚪Chiqish', text: 'exit' }]
-
-//       let messageText = 'Chiqish'
-
-//       if (products.length === PER_PAGE * ctx.session.currPage) {
-//         messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
-
-//         properties.push({ view: '➡️ Keyingisi', text: 'next' })
-//       }
-
-//       if (ctx.session.currPage > 1) {
-//         messageText = "Chiqish yoki boshqa mahsulotlarni ko'rish uchun tugmani bosing"
-
-//         properties.unshift({ view: '⬅️ Oldingisi', text: 'previous' })
-//       }
-
-//       const message = await ctx.reply(messageText, {
-//         reply_markup: {
-//           ...inlineKFunction(2, properties),
-//         },
-//       })
-
-//       ctx.session.messageIds.push(message.message_id)
-//     }
-//   } else {
-//     // check is product exists
-//     if (!ctx.session.productIds.includes(parseInt(productId)) && 'add' === command) {
-//       return await ctx.answerCallbackQuery('Bunday mahsulot mavjud emas')
-//     }
-
-//     // add
-//     if (command === 'add') {
-//       await ctx.answerCallbackQuery("Mahsulot savatga muvaffaqiyatli qo'shildi")
-
-//       // add to bucket (if exists just increase quantity)
-//       const order = await Model.Order.findOne<IOrder>({
-//         userId: ctx.user.userId,
-//         status: false,
-//         productId: parseInt(productId),
-//       })
-
-//       if (order) {
-//         order.quantity += 1
-
-//         await order.save()
-//       } else {
-//         await Model.Order.create<IOrder>({
-//           userId: ctx.user.userId,
-//           productId: parseInt(productId),
-//           quantity: 1,
-//           status: false,
-//           id: Date.now(),
-//         })
-//       }
-//     } else {
-//       ctx.session.messageIds.push(ctx.message?.message_id)
-
-//       return exitScene(ctx, "Asosiy menuga o'tildi")
-//     }
-//   }
-// })
-
-// export default scene
+import { Scene } from 'grammy-scenes'
+import { BotContext } from '#types/context'
+import { IOrder, IProduct } from '#types/database'
+import Model from '#config/database'
+import { messageDeleter } from '#helper/messageDeleter'
+import { exitScene } from '#helper/exitScene'
+import customKFunction from '#keyboard/custom'
+import inlineKFunction from '#keyboard/inline'
+import { PER_PAGE } from '#utils/constants'
+
+const scene = new Scene<BotContext>('Market')
+
+// initial
+scene.step(async (ctx) => {
+  ctx.session.chatId = ctx.chat?.id
+  ctx.session.messageIds = []
+
+  const message = await ctx.reply("Barcha maxsulotlarni ko'rishni xohlaysizmi yoki qidirishni?", {
+    reply_markup: {
+      keyboard: customKFunction(2, '🔍 Qidirish', "👁️ Ko'rish", '🚪Chiqish').build(),
+      resize_keyboard: true,
+    },
+  })
+
+  ctx.session.messageIds.push(message.message_id)
+})
+
+// command
+scene.wait('search').on('message:text', async (ctx) => {
+  await messageDeleter(ctx)
+
+  const textData = ctx.message?.text
+
+  // check
+  if (!['🚪Chiqish', '🔍 Qidirish', "👁️ Ko'rish"].includes(textData)) {
+    const message = await ctx.reply("Barcha maxsulotlarni ko'rishni xohlaysizmi yoki qidirishni?", {
+      reply_markup: {
+        keyboard: customKFunction(2, '🔍 Qidirish', "👁️ Ko'rish", '🚪Chiqish').build(),
+        resize_keyboard: true,
+      },
+    })
+
+    return ctx.session.messageIds.push(message.message_id)
+  }
+
+  if (textData === '🚪Chiqish') {
+    return exitScene(ctx, "Asosiy menuga o'tildi")
+  } else if (textData === '🔍 Qidirish') {
+    ctx.session.show = 'search'
+
+    const message = await ctx.reply('Qidirish uchun maxsulot nomini kiriting', {
+      reply_markup: {
+        resize_keyboard: true,
+        keyboard: customKFunction(1, '🚪Chiqish').build(),
+      },
+    })
+
+    ctx.session.messageIds.push(message.message_id)
+
+    ctx.scene.resume()
+  } else if (textData === "👁️ Ko'rish") {
+    ctx.session.show = 'show'
+
+    const products = await Model.Product.find<IProduct>()
+
+    if (products.length === 0) {
+      return exitScene(ctx, "Maxsulotlar ro'yxati bo'sh\n\n Asosiy menuga o'tildi")
+    }
+
+    const buttons = inlineKFunction(
+      2,
+      products.map((product) => {
+        return { view: product.name, text: product.id.toString() }
+      }),
+    )
+
+    const message = await ctx.reply("Barcha maxsulotlar ro'yxati", { reply_markup: buttons })
+
+    ctx.session.messageIds.push(message.message_id)
+
+    ctx.scene.resume()
+  }
+})
+
+// action part 1
+scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
+  await messageDeleter(ctx)
+
+  const inlineData = ctx.update?.callback_query?.data ? +ctx.update?.callback_query?.data : null
+
+  const textData = ctx.message?.text
+
+  if (inlineData) {
+    ctx.answerCallbackQuery()
+  }
+
+  const product = await Model.Product.findOne<IProduct>({
+    $or: [
+      { id: inlineData },
+      { name: { $regex: '.*' + textData + '.*' } },
+      { description: { $regex: '.*' + textData + '.*', $options: 'i' } },
+    ],
+  }).limit(PER_PAGE)
+
+  if (!product) {
+    return exitScene(ctx, "Bunday maxsulot mavjud emas\n\n Asosiy menuga o'tildi")
+  } else {
+    const message = await ctx.replyWithPhoto(`https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/${product.image}`, {
+      caption: `Nomi: ${product.name}\nMa'lumoti: ${product.description}\nNarxi: ${product.price}\nTuri: ${product.type}`,
+      reply_markup: {
+        keyboard: customKFunction(1, "➕ Savatga qo'shish", '🚪Chiqish').build(),
+        resize_keyboard: true,
+      },
+    })
+
+    ctx.session.messageIds.push(message.message_id)
+    ctx.session.product = product
+  }
+
+  ctx.scene.resume()
+})
+
+// action part 2
+scene.wait('bucket').on('message:text', async (ctx) => {
+  const textData = ctx.message?.text
+
+  // check
+  if (!["➕ Savatga qo'shish", '🚪Chiqish'].includes(textData)) {
+    const message = await ctx.reply('Quyidagi amallardan birini tanlang', {
+      reply_markup: {
+        keyboard: customKFunction(2, "➕ Savatga qo'shish", '🚪Chiqish').build(),
+        resize_keyboard: true,
+      },
+    })
+
+    return ctx.session.messageIds.push(message.message_id)
+  }
+
+  if (textData === '🚪Chiqish') {
+    return exitScene(ctx, "Asosiy menuga o'tildi")
+  } else {
+    if (ctx.session.product.type === 'miqdor') {
+      const message = await ctx.reply("Ushbu mahsulotdan nechta qo'shishni xohlaysiz?\n\n Masalan: 1 ta, 2 ta, 3 ta", {
+        reply_markup: {
+          keyboard: customKFunction(1, '🚪Chiqish').build(),
+          resize_keyboard: true,
+        },
+      })
+
+      ctx.session.messageIds.push(message.message_id)
+
+      ctx.scene.resume()
+    } else {
+      const message = await ctx.reply(
+        'Ushbu mahsulotdan necha kg yoki g olishni xohlaysiz?\n\n Masalan: 1 kg, 400 g, 5 kg',
+        {
+          reply_markup: {
+            keyboard: customKFunction(1, '🚪Chiqish').build(),
+            resize_keyboard: true,
+          },
+        },
+      )
+
+      ctx.session.messageIds.push(message.message_id)
+
+      ctx.scene.resume()
+    }
+  }
+})
+
+// finish
+scene.wait('quantity_weight').on('message:text', async (ctx) => {
+  const textData = ctx.message?.text
+
+  if (textData === '🚪Chiqish') {
+    return exitScene(ctx, "Asosiy menuga o'tildi")
+  }
+
+  if (ctx.session.product.type === 'miqdor') {
+    if (!/^(\d+)\s*ta$/.test(textData)) {
+      const message = await ctx.reply("Ushbu mahsulotdan nechta qo'shishni xohlaysiz?\n\n Masalan: 1 ta, 2 ta, 3 ta", {
+        reply_markup: {
+          keyboard: customKFunction(1, '🚪Chiqish').build(),
+          resize_keyboard: true,
+        },
+      })
+
+      ctx.session.messageIds.push(message.message_id)
+    } else {
+      const userOrder = await Model.Order.findOne<IOrder>({
+        userId: ctx.user.userId,
+        productId: ctx.session.product.id,
+        status: false,
+        isDelivered: false,
+      })
+
+      const result = textData.match(/^(\d+)\s*ta$/)!
+
+      if (userOrder) {
+        userOrder.quantity! += parseInt(result![1])
+
+        await userOrder.save()
+      } else {
+        await Model.Order.create<IOrder>({
+          id: Date.now(),
+          userId: ctx.user.userId,
+          productId: ctx.session.product.id,
+          quantity: parseInt(result![1]),
+          status: false,
+          isDelivered: false,
+        })
+      }
+
+      return exitScene(ctx, "Savatga muvaffaqiyatli qo'shildi\n\n Asosiy menuga o'tildi")
+    }
+  } else {
+    if (!/^([\d.]+)\s*(kg|g)$/.test(textData)) {
+      const message = await ctx.reply(
+        'Ushbu mahsulotdan necha kg yoki g olishni xohlaysiz?\n\n Masalan: 1 kg, 400 g, 5 kg',
+        {
+          reply_markup: {
+            keyboard: customKFunction(1, '🚪Chiqish').build(),
+            resize_keyboard: true,
+          },
+        },
+      )
+
+      ctx.session.messageIds.push(message.message_id)
+    } else {
+      const result = textData.match(/^([\d.]+)\s*(kg|g)$/)!
+      const weight = parseFloat(result![1])
+      const kgOrg = result![2]
+
+      const userOrder = await Model.Order.findOne<IOrder>({
+        userId: ctx.user.userId,
+        productId: ctx.session.product.id,
+        status: false,
+        isDelivered: false,
+      })
+
+      if (userOrder) {
+        if (kgOrg === 'kg') {
+          userOrder.weight! += weight
+        } else {
+          userOrder.weight! += weight / 1000
+        }
+
+        await userOrder.save()
+      } else {
+        await Model.Order.create<IOrder>({
+          id: Date.now(),
+          userId: ctx.user.userId,
+          productId: ctx.session.product.id,
+          weight: kgOrg === 'kg' ? weight : weight / 1000,
+          status: false,
+          isDelivered: false,
+        })
+      }
+
+      return exitScene(ctx, "Savatga muvaffaqiyatli qo'shildi\n\n Asosiy menuga o'tildi")
+    }
+  }
+})
+
+export default scene

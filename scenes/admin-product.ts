@@ -43,8 +43,6 @@ scene.step(async (ctx) => {
 scene.wait('action').on('message:text', async (ctx) => {
   await messageDeleter(ctx)
 
-  ctx.session.messageIds = []
-
   const action = ctx.message.text
 
   // check
@@ -119,8 +117,6 @@ scene.wait('action').on('message:text', async (ctx) => {
 scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
   await messageDeleter(ctx)
 
-  ctx.session.messageIds = []
-
   const textData = ctx.message.text
 
   if (textData === '🚪Chiqish') {
@@ -172,7 +168,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
         description,
         price: +price!,
         image: imageName,
-        type: type === 'miqdor' ? 'quantity' : 'weight',
+        type,
       })
 
       return exitScene(ctx, "Mahsulot muvaffaqiyatli qo'shildi")
@@ -188,7 +184,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
           description,
           price: +price!,
           image: imageName,
-          type: type === 'miqdor' ? 'quantity' : 'weight',
+          type,
         },
       )
 
@@ -233,13 +229,13 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
   }
 })
 
-// action part 2
+// finish
 scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
+  await ctx.answerCallbackQuery()
+
   await messageDeleter(ctx)
 
-  ctx.session.messageIds = []
-
-  const inlineData = ctx.update?.callback_query?.data
+  const inlineData = ctx.update?.callback_query?.data ? +ctx.update?.callback_query?.data : null
   const textData = ctx.message?.text
 
   const product = await Model.Product.findOne<IProduct>({

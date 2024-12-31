@@ -73,7 +73,7 @@ const Product = new Schema(
     type: {
       required: true,
       type: String,
-      enum: Object.values(['quantity', 'weight']),
+      enum: Object.values(['miqdor', "og'irlik"]),
     },
   },
   { versionKey: false },

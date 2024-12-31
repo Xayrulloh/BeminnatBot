@@ -20,7 +20,7 @@ export interface IProduct extends Document {
   description: string
   image: string
   price: number
-  type: 'quantity' | 'weight'
+  type: 'miqdor' | "og'irlik"
 }
 
 export interface IOrder extends Document {
