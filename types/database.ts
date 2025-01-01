@@ -33,8 +33,8 @@ export interface IOrder extends Document {
   isDelivered: boolean
   latitude: number
   longitude: number
-  productPrice: number
-  waybill: number
+  productOverallPrice: number
+  overallWaybill: number
 }
 
 export interface IWaybill extends Document {
