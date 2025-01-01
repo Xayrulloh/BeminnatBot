@@ -111,6 +111,22 @@ const Order = new Schema(
       required: true,
       type: Boolean,
     },
+    latitude: {
+      required: true,
+      type: Number,
+    },
+    longitude: {
+      required: true,
+      type: Number,
+    },
+    productOverallPrice: {
+      required: true,
+      type: Number,
+    },
+    overallWaybill: {
+      required: true,
+      type: Number,
+    },
   },
   { versionKey: false },
 )
