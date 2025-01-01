@@ -7,6 +7,7 @@ import adminAddress from './admin-address'
 import market from './market'
 import adminOrder from './admin-order'
 import order from './order'
+import adminWaybill from './admin-waybill'
 
 export const scenes = new ScenesComposer<BotContext>(
   start,
@@ -16,4 +17,5 @@ export const scenes = new ScenesComposer<BotContext>(
   bucket,
   adminOrder,
   order,
+  adminWaybill
 )
