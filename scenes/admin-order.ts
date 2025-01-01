@@ -1,9 +1,9 @@
 import { Scene } from 'grammy-scenes'
 import { BotContext } from '#types/context'
 import Model from '#config/database'
-import { IAddress, IOrder, IProduct, IUser } from '#types/database'
+import { IOrder, IProduct, IUser } from '#types/database'
 import { exitScene } from '#helper/exitScene'
-import { ADMIN_USER_ID } from '#utils/constants'
+import { ADMIN_USER_ID, PER_PAGE } from '#utils/constants'
 import inlineKFunction from '#keyboard/inline'
 import customKFunction from '#keyboard/custom'
 import { messageDeleter } from '#helper/messageDeleter'
@@ -30,12 +30,13 @@ scene.step(async (ctx) => {
 
   const users = await Model.User.find<IUser>({ userId: { $in: uniqueUserIds } })
 
-  const buttons = inlineKFunction(
-    2,
-    users.map((user) => {
-      return { view: `${user.name}: ${user.phoneNumber}`, text: user.userId.toString() }
-    }),
-  )
+  ctx.session.currPage = 1
+
+  ctx.session.inlineKeyboard = users.map((user) => {
+    return { view: `${user.name}: ${user.phoneNumber}`, text: user.userId.toString() }
+  })
+
+  const buttons = inlineKFunction(2, ctx.session.inlineKeyboard)
 
   const message = await ctx.reply("Buyurtma qilgan foydalanuvchilar ro'yxati", { reply_markup: buttons })
 
@@ -46,7 +47,39 @@ scene.step(async (ctx) => {
 
 // actions
 scene.wait('user').on('callback_query:data', async (ctx) => {
-  await ctx.answerCallbackQuery()
+  const inputData = ctx.update?.callback_query?.data
+
+  if (inputData) {
+    if (inputData == '<') {
+      if (ctx.session.currPage != 1) {
+        await ctx.editMessageText("Buyurtma qilgan foydalanuvchilar ro'yxati", {
+          reply_markup: inlineKFunction(3, ctx.session.inlineKeyboard, --ctx.session.currPage),
+          parse_mode: 'HTML',
+        })
+      } else {
+        await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+      }
+
+      return
+    } else if (inputData == '>') {
+      if (ctx.session.currPage * PER_PAGE <= ctx.session.inlineKeyboard.length) {
+        await ctx.editMessageText("Buyurtma qilgan foydalanuvchilar ro'yxati", {
+          reply_markup: inlineKFunction(3, ctx.session.inlineKeyboard, ++ctx.session.currPage),
+          parse_mode: 'HTML',
+        })
+      } else {
+        await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+      }
+
+      return
+    } else if (inputData == 'pageNumber') {
+      await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+
+      return
+    }
+
+    await ctx.answerCallbackQuery()
+  }
 
   await messageDeleter(ctx)
 

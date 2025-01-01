@@ -123,6 +123,8 @@ scene.wait('order').on(['callback_query:data', 'message:text'], async (ctx) => {
           ctx.session.amount +=
             ctx.session.productObj[ctx.session.orderObj[key].productId].price *
             (ctx.session.orderObj[key].quantity || ctx.session.orderObj[key].weight)
+        } else {
+          delete ctx.session.orderObj[key]
         }
       }
 

@@ -213,12 +213,13 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
         return exitScene(ctx, "Maxsulotlar ro'yxati bo'sh\n\n Asosiy menuga o'tildi")
       }
 
-      const buttons = inlineKFunction(
-        2,
-        products.map((product) => {
-          return { view: product.name, text: product.id.toString() }
-        }),
-      )
+      ctx.session.inlineKeyboard = products.map((product) => {
+        return { view: product.name, text: product.id.toString() }
+      })
+
+      ctx.session.currPage = 1
+
+      const buttons = inlineKFunction(2, ctx.session.inlineKeyboard)
 
       const message = await ctx.reply("Barcha maxsulotlar ro'yxati", { reply_markup: buttons })
 
@@ -231,7 +232,39 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
 
 // finish
 scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
-  await ctx.answerCallbackQuery()
+  const inputData = ctx.update?.callback_query?.data
+
+  if (inputData) {
+    if (inputData == '<') {
+      if (ctx.session.currPage != 1) {
+        await ctx.editMessageText("Barcha maxsulotlar ro'yxati", {
+          reply_markup: inlineKFunction(3, ctx.session.inlineKeyboard, --ctx.session.currPage),
+          parse_mode: 'HTML',
+        })
+      } else {
+        await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+      }
+
+      return
+    } else if (inputData == '>') {
+      if (ctx.session.currPage * PER_PAGE <= ctx.session.inlineKeyboard.length) {
+        await ctx.editMessageText("Barcha maxsulotlar ro'yxati", {
+          reply_markup: inlineKFunction(3, ctx.session.inlineKeyboard, ++ctx.session.currPage),
+          parse_mode: 'HTML',
+        })
+      } else {
+        await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+      }
+
+      return
+    } else if (inputData == 'pageNumber') {
+      await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+
+      return
+    }
+
+    await ctx.answerCallbackQuery()
+  }
 
   await messageDeleter(ctx)
 

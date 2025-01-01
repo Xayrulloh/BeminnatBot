@@ -67,12 +67,12 @@ scene.wait('search').on('message:text', async (ctx) => {
       return exitScene(ctx, "Maxsulotlar ro'yxati bo'sh\n\n Asosiy menuga o'tildi")
     }
 
-    const buttons = inlineKFunction(
-      2,
-      products.map((product) => {
-        return { view: product.name, text: product.id.toString() }
-      }),
-    )
+    ctx.session.currPage = 1
+    ctx.session.inlineKeyboard = products.map((product) => {
+      return { view: product.name, text: product.id.toString() }
+    })
+
+    const buttons = inlineKFunction(2, ctx.session.inlineKeyboard)
 
     const message = await ctx.reply("Barcha maxsulotlar ro'yxati", { reply_markup: buttons })
 
@@ -84,6 +84,40 @@ scene.wait('search').on('message:text', async (ctx) => {
 
 // action part 1
 scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
+  const inputData = ctx.update?.callback_query?.data
+
+  if (inputData) {
+    if (inputData == '<') {
+      if (ctx.session.currPage != 1) {
+        await ctx.editMessageText("Barcha maxsulotlar ro'yxati", {
+          reply_markup: inlineKFunction(3, ctx.session.inlineKeyboard, --ctx.session.currPage),
+          parse_mode: 'HTML',
+        })
+      } else {
+        await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+      }
+
+      return
+    } else if (inputData == '>') {
+      if (ctx.session.currPage * PER_PAGE <= ctx.session.inlineKeyboard.length) {
+        await ctx.editMessageText("Barcha maxsulotlar ro'yxati", {
+          reply_markup: inlineKFunction(3, ctx.session.inlineKeyboard, ++ctx.session.currPage),
+          parse_mode: 'HTML',
+        })
+      } else {
+        await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+      }
+
+      return
+    } else if (inputData == 'pageNumber') {
+      await ctx.answerCallbackQuery('Quyidagilardan birini bosing')
+
+      return
+    }
+
+    await ctx.answerCallbackQuery()
+  }
+
   await messageDeleter(ctx)
 
   const inlineData = ctx.update?.callback_query?.data ? +ctx.update?.callback_query?.data : null
@@ -208,6 +242,10 @@ scene.wait('quantity_weight').on('message:text', async (ctx) => {
           quantity: parseInt(result![1]),
           status: false,
           isDelivered: false,
+          latitude: 0,
+          longitude: 0,
+          productOverallPrice: 0,
+          overallWaybill: 0,
         })
       }
 
@@ -254,6 +292,10 @@ scene.wait('quantity_weight').on('message:text', async (ctx) => {
           weight: kgOrg === 'kg' ? weight : weight / 1000,
           status: false,
           isDelivered: false,
+          latitude: 0,
+          longitude: 0,
+          productOverallPrice: 0,
+          overallWaybill: 0,
         })
       }
 

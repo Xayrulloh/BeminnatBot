@@ -10,7 +10,9 @@ export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   const inlineData = ctx.update?.callback_query?.data
   const isOrderSceneActive = ctx.session.scenes?.stack?.some((stack) => stack.scene === 'Order')
 
-  if (!isOrderSceneActive && !inlineData) {
+  if (!inlineData) {
+    ctx.deleteMessage().catch(() => {})
+  } else if (inlineData && inlineData.split('_')[0] === 'delete') {
     ctx.deleteMessage().catch(() => {})
   }
 
