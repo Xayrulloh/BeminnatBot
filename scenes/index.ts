@@ -17,5 +17,5 @@ export const scenes = new ScenesComposer<BotContext>(
   bucket,
   adminOrder,
   order,
-  adminWaybill
+  adminWaybill,
 )

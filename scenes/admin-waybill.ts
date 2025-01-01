@@ -17,8 +17,8 @@ scene.step(async (ctx) => {
 
   const message = await ctx.reply('Narxni kiriting:', {
     reply_markup: {
-        remove_keyboard: true
-    }
+      remove_keyboard: true,
+    },
   })
 
   ctx.session.messageIds.push(message.message_id)
