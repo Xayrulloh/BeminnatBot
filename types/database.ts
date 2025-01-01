@@ -31,6 +31,10 @@ export interface IOrder extends Document {
   quantity?: number
   weight?: number
   isDelivered: boolean
+  latitude: number
+  longitude: number
+  productPrice: number
+  waybill: number
 }
 
 export interface IWaybill extends Document {

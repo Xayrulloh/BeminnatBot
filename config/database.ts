@@ -25,6 +25,7 @@ const User = new Schema(
   { versionKey: false },
 )
 
+
 const Address = new Schema(
   {
     latitude: {
@@ -110,6 +111,22 @@ const Order = new Schema(
     isDelivered: {
       required: true,
       type: Boolean,
+    },
+    latitude: {
+      required: true,
+      type: Number,
+    },
+    longitude: {
+      required: true,
+      type: Number,
+    },
+    productOverallPrice: {
+      required: true,
+      type: Number,
+    },
+    overallWaybill: {
+      required: true,
+      type: Number,
     },
   },
   { versionKey: false },
