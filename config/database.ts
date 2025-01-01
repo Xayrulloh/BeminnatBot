@@ -25,7 +25,6 @@ const User = new Schema(
   { versionKey: false },
 )
 
-
 const Address = new Schema(
   {
     latitude: {

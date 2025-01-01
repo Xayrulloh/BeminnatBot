@@ -161,16 +161,18 @@ scene.wait('location').on('message:location', async (ctx) => {
 
   const adminLocation = await Model.Address.findOne<IAddress>({ userId: ADMIN_USER_ID })
 
-  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${adminLocation!.longitude},${adminLocation!.latitude};${userLocation.longitude},${userLocation.latitude}`;
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${adminLocation!.longitude},${
+    adminLocation!.latitude
+  };${userLocation.longitude},${userLocation.latitude}`
 
   const response = await axios.get(url, {
-      params: {
-          access_token: process.env.MAPBOX_ACCESS_TOKEN,
-          geometries: 'geojson',
-          overview: 'simplified',
-          alternatives: true
-      },
-  });
+    params: {
+      access_token: process.env.MAPBOX_ACCESS_TOKEN,
+      geometries: 'geojson',
+      overview: 'simplified',
+      alternatives: true,
+    },
+  })
 
   const data: {
     routes: Array<{
@@ -189,10 +191,10 @@ scene.wait('location').on('message:location', async (ctx) => {
   } = response.data
 
   const bestRoute = data.routes.reduce((prev, curr) => {
-      return curr.distance < prev.distance ? curr : prev;
-  });
+    return curr.distance < prev.distance ? curr : prev
+  })
 
-  const distance = bestRoute.distance / 1000;
+  const distance = bestRoute.distance / 1000
 
   ctx.session.waybill = 12000
   ctx.session.userLocation = userLocation
@@ -203,12 +205,15 @@ scene.wait('location').on('message:location', async (ctx) => {
     ctx.session.waybill = Math.round((12000 + (distance - 2) * waybill!.price) / 100) * 100
   }
 
-  const message = await ctx.reply(`Buyurtma narxi: ${ctx.session.amount} sum\nYetkazib berish narxi: ${ctx.session.waybill}`, {
-    reply_markup: {
-      resize_keyboard: true,
-      keyboard: customKFunction(2, `✅ Tasdiqlayman`, '🚪Chiqish').build(),
+  const message = await ctx.reply(
+    `Buyurtma narxi: ${ctx.session.amount} sum\nYetkazib berish narxi: ${ctx.session.waybill}`,
+    {
+      reply_markup: {
+        resize_keyboard: true,
+        keyboard: customKFunction(2, `✅ Tasdiqlayman`, '🚪Chiqish').build(),
+      },
     },
-  })
+  )
 
   ctx.session.messageIds.push(message.message_id)
 
@@ -238,7 +243,17 @@ scene.wait('notify').on('message:text', async (ctx) => {
       `Yangi buyurtma berildi\n\nXaridor ismi: ${ctx.user.name}\nXaridor telefon raqami: ${ctx.user.phoneNumber}`,
     )
 
-    await Model.Order.updateMany({ userId: ctx.user.userId, status: false }, { status: true, isDelivered: false, latitude: ctx.session.userLocation!.latitude, longitude: ctx.session.userLocation!.longitude, productOverallPrice: ctx.session.amount, overallWaybill: ctx.session.waybill })
+    await Model.Order.updateMany(
+      { userId: ctx.user.userId, status: false },
+      {
+        status: true,
+        isDelivered: false,
+        latitude: ctx.session.userLocation!.latitude,
+        longitude: ctx.session.userLocation!.longitude,
+        productOverallPrice: ctx.session.amount,
+        overallWaybill: ctx.session.waybill,
+      },
+    )
 
     return exitScene(ctx, 'Xaridingiz uchun raxmat.\nTez orada xaydovchi sizga aloqaga chiqadi')
   }
