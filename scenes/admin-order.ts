@@ -91,7 +91,7 @@ scene.wait('user').on('callback_query:data', async (ctx) => {
         }\n${
           productObj[order.productId].type === 'miqdor'
             ? `Maxsulot miqdori: ${order.quantity} ta`
-            : `Maxsulot og'irlik: ${order.weight} kg`
+            : `Maxsulot og'irligi: ${order.weight} kg`
         }`,
       },
     )

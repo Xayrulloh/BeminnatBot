@@ -8,8 +8,9 @@ export async function authMiddleware(ctx: BotContext, next: NextFunction) {
   if (ctx.from?.is_bot) return
 
   const inlineData = ctx.update?.callback_query?.data
+  const isOrderSceneActive = ctx.session.scenes?.stack?.some((stack) => stack.scene === 'Order')
 
-  if (!['decrement', 'increment'].includes(inlineData?.split('_')?.[0] || '')) {
+  if (!isOrderSceneActive && inlineData) {
     ctx.deleteMessage().catch(() => {})
   }
 
