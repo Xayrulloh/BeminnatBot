@@ -13,6 +13,7 @@ export const schema = z.object({
   CLOUDFLARE_ACCESS_KEY_ID: z.string(),
   CLOUDFLARE_SECRET_ACCESS_KEY: z.string(),
   CLOUDFLARE_ENDPOINT: z.string(),
+  MAPBOX_ACCESS_TOKEN: z.string(),
 })
 
 type Env = z.infer<typeof schema>
