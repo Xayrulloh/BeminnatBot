@@ -6,5 +6,6 @@ import address from './address'
 import adminProduct from './admin-product'
 import adminAddress from './admin-address'
 import market from './market'
+import adminWaybill from './admin-waybill'
 
-export const scenes = new ScenesComposer<BotContext>(start, address, adminProduct, market, adminAddress)
+export const scenes = new ScenesComposer<BotContext>(start, address, adminProduct, market, adminAddress, adminWaybill)
