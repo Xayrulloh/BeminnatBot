@@ -92,7 +92,7 @@ scene.wait('user').on('callback_query:data', async (ctx) => {
 
   const userInfoMessage = await ctx.reply(
     `Foydalanuvchi ismi: ${user!.name}\nTelefon raqami: ${user!.phoneNumber}\n${
-      user!.userName ? `Username: https://t.me/${user!.userName}` : ''
+      user!.userName != 'unknown' ? `Username: https://t.me/${user!.userName}` : ''
     }`,
     {
       reply_markup: {
