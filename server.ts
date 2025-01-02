@@ -43,20 +43,32 @@ bot.command('start', async (ctx) => {
   })
 })
 
-bot.command('address', async (ctx) => {
-  ctx.scenes.enter('Address')
-})
-
 bot.command('bucket', async (ctx) => {
   ctx.scenes.enter('Bucket')
 })
 
-bot.command('admin_category', async (ctx) => {
-  ctx.scenes.enter('AdminCategory')
+bot.command('order', async (ctx) => {
+  ctx.scenes.enter('Order')
+})
+
+bot.command('market', async (ctx) => {
+  ctx.scenes.enter('Market')
 })
 
 bot.command('admin_product', async (ctx) => {
   ctx.scenes.enter('AdminProduct')
+})
+
+bot.command('admin_address', async (ctx) => {
+  ctx.scenes.enter('AdminAddress')
+})
+
+bot.command('admin_order', async (ctx) => {
+  ctx.scenes.enter('AdminOrder')
+})
+
+bot.command('admin_waybill', async (ctx) => {
+  ctx.scenes.enter('AdminWaybill')
 })
 
 bot.on('message:text', async (ctx) => {
