@@ -13,6 +13,7 @@ const scene = new Scene<BotContext>('AdminOrder')
 // initial
 scene.step(async (ctx) => {
   ctx.session.messageIds = []
+  ctx.session.chatId = ctx.chat?.id
 
   if (ctx.user.userId != ADMIN_USER_ID) {
     return ctx.scene.exit()
@@ -167,8 +168,6 @@ scene.wait('deliver').on('message:text', async (ctx) => {
     return ctx.session.messageIds.push(message.message_id)
   }
 
-  await messageDeleter(ctx)
-
   if (textData === '🚪Chiqish') {
     return exitScene(ctx, "Asosiy menuga o'tildi")
   }
@@ -178,13 +177,9 @@ scene.wait('deliver').on('message:text', async (ctx) => {
     'Xaydovchi yolga chiqdi.\nMaxsulot tez orada yetib keladi.\nXaridingiz uchun rahmat',
   )
 
-  const message = await ctx.reply("Xaridor ogohlantirib qo'yildi.\nOq yo'l")
-
-  ctx.session.messageIds.push(message.message_id)
-
   await Model.Order.updateMany({ userId: ctx.session.user!.userId }, { isDelivered: true })
 
-  return exitScene(ctx, "Asosiy menuga o'tildi")
+  return exitScene(ctx, "Xaridor ogohlantirib qo'yildi.\nOq yo'l\n\nAsosiy menuga o'tildi")
 })
 
 export default scene

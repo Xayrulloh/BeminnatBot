@@ -120,7 +120,7 @@ scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
 
   await messageDeleter(ctx)
 
-  const inlineData = ctx.update?.callback_query?.data ? +ctx.update?.callback_query?.data : null
+  const inlineData = ctx.update?.callback_query?.data ? parseInt(ctx.update?.callback_query?.data) : null
 
   const textData = ctx.message?.text
 
@@ -172,33 +172,33 @@ scene.wait('bucket').on('message:text', async (ctx) => {
 
   if (textData === '🚪Chiqish') {
     return exitScene(ctx, "Asosiy menuga o'tildi")
+  }
+
+  if (ctx.session.product.type === 'miqdor') {
+    const message = await ctx.reply("Ushbu mahsulotdan nechta qo'shishni xohlaysiz?\n\n Masalan: 1, 2, 3", {
+      reply_markup: {
+        keyboard: customKFunction(1, '🚪Chiqish').build(),
+        resize_keyboard: true,
+      },
+    })
+
+    ctx.session.messageIds.push(message.message_id)
+
+    ctx.scene.resume()
   } else {
-    if (ctx.session.product.type === 'miqdor') {
-      const message = await ctx.reply("Ushbu mahsulotdan nechta qo'shishni xohlaysiz?\n\n Masalan: 1 ta, 2 ta, 3 ta", {
+    const message = await ctx.reply(
+      'Ushbu mahsulotdan necha kg yoki g olishni xohlaysiz?\n\n Masalan: 1 kg, 400 g, 5 kg',
+      {
         reply_markup: {
           keyboard: customKFunction(1, '🚪Chiqish').build(),
           resize_keyboard: true,
         },
-      })
+      },
+    )
 
-      ctx.session.messageIds.push(message.message_id)
+    ctx.session.messageIds.push(message.message_id)
 
-      ctx.scene.resume()
-    } else {
-      const message = await ctx.reply(
-        'Ushbu mahsulotdan necha kg yoki g olishni xohlaysiz?\n\n Masalan: 1 kg, 400 g, 5 kg',
-        {
-          reply_markup: {
-            keyboard: customKFunction(1, '🚪Chiqish').build(),
-            resize_keyboard: true,
-          },
-        },
-      )
-
-      ctx.session.messageIds.push(message.message_id)
-
-      ctx.scene.resume()
-    }
+    ctx.scene.resume()
   }
 })
 
@@ -211,8 +211,8 @@ scene.wait('quantity_weight').on('message:text', async (ctx) => {
   }
 
   if (ctx.session.product.type === 'miqdor') {
-    if (!/^(\d+)\s*ta$/.test(textData)) {
-      const message = await ctx.reply("Ushbu mahsulotdan nechta qo'shishni xohlaysiz?\n\n Masalan: 1 ta, 2 ta, 3 ta", {
+    if (isNaN(parseInt(textData))) {
+      const message = await ctx.reply("Ushbu mahsulotdan nechta qo'shishni xohlaysiz?\n\n Masalan: 1, 2, 3", {
         reply_markup: {
           keyboard: customKFunction(1, '🚪Chiqish').build(),
           resize_keyboard: true,
@@ -228,10 +228,8 @@ scene.wait('quantity_weight').on('message:text', async (ctx) => {
         isDelivered: false,
       })
 
-      const result = textData.match(/^(\d+)\s*ta$/)!
-
       if (userOrder) {
-        userOrder.quantity! += parseInt(result![1])
+        userOrder.quantity! += parseInt(textData)
 
         await userOrder.save()
       } else {
@@ -239,7 +237,7 @@ scene.wait('quantity_weight').on('message:text', async (ctx) => {
           id: Date.now(),
           userId: ctx.user.userId,
           productId: ctx.session.product.id,
-          quantity: parseInt(result![1]),
+          quantity: parseInt(textData),
           status: false,
           isDelivered: false,
           latitude: 0,

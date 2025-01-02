@@ -21,6 +21,7 @@ scene.step(async (ctx) => {
   })
 
   ctx.session.messageIds = [message.message_id]
+  ctx.session.chatId = ctx.chat?.id
 })
 
 // action

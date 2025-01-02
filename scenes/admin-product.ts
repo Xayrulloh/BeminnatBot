@@ -166,7 +166,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
         id: Date.now(),
         name,
         description,
-        price: +price!,
+        price: parseInt(price!),
         image: imageName,
         type,
       })
@@ -182,7 +182,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
         {
           name,
           description,
-          price: +price!,
+          price: parseInt(price!),
           image: imageName,
           type,
         },

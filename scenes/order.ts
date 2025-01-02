@@ -12,6 +12,7 @@ const scene = new Scene<BotContext>('Order')
 // initial
 scene.step(async (ctx) => {
   ctx.session.messageIds = []
+  ctx.session.chatId = ctx.chat?.id
 
   const orders = await Model.Order.find<IOrder>({ userId: ctx.user.userId, status: true, isDelivered: true })
 
