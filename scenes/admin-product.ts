@@ -98,7 +98,7 @@ scene.wait('action').on('message:text', async (ctx) => {
   } else {
     ctx.session.command = "✏️ Maxsulotni o'zgartirish" === action ? 'update' : 'create'
 
-    const message = await ctx.replyWithPhoto(env.CLOUDFLARE_URL + '/browser.jpg', {
+    const message = await ctx.replyWithPhoto(env.CLOUDFLARE_URL + '/b24274086aeece6ab9dcf6ff06bfefaf.png', {
       caption:
         "Iltimos ma'lumotlarni quyidagi tartibda kiriting!\n\nNomi:\nMa'lumoti:\nNarxi:\nTuri: (miqdor yoki og'irlik)",
       reply_markup: {
@@ -141,7 +141,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
     const type = splitData?.[3]?.split('Turi:')?.[1]?.trim()
 
     if (!name || !description || !price || !type) {
-      const message = await ctx.replyWithPhoto(env.CLOUDFLARE_URL + '/browser.jpg', {
+      const message = await ctx.replyWithPhoto(env.CLOUDFLARE_URL + '/b24274086aeece6ab9dcf6ff06bfefaf.png', {
         caption:
           "Iltimos ma'lumotlarni quyidagi tartibda kiriting!\n\nNomi:\nMa'lumoti:\nNarxi:\nTuri: (miqdor yoki og'irlik)",
         reply_markup: {
