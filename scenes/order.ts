@@ -107,21 +107,18 @@ scene.wait('product').on(['callback_query:data', 'message:text'], async (ctx) =>
 
   const productId = ctx.update?.callback_query?.data!
 
-  const message = await ctx.replyWithPhoto(
-    `${env.CLOUDFLARE_URL}/${ctx.session.productObj[productId].image}`,
-    {
-      caption: `Maxsulot nomi: ${ctx.session.productObj[productId].name}\nMaxsulot ma'lumoti: ${
-        ctx.session.productObj[productId].description
-      }\nMaxsulot umumiy narxi: ${
-        ctx.session.productObj[productId].price *
-        (ctx.session.orderObj[productId].quantity || ctx.session.orderObj[productId].weight)!
-      }\nMaxsulot turi: ${ctx.session.productObj[productId].type}\n${
-        ctx.session.productObj[productId].type === 'miqdor'
-          ? `Maxsulot miqdori: ${ctx.session.orderObj[productId].quantity} ta`
-          : `Maxsulot og'irligi: ${ctx.session.orderObj[productId].weight} kg`
-      }`,
-    },
-  )
+  const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}/${ctx.session.productObj[productId].image}`, {
+    caption: `Maxsulot nomi: ${ctx.session.productObj[productId].name}\nMaxsulot ma'lumoti: ${
+      ctx.session.productObj[productId].description
+    }\nMaxsulot umumiy narxi: ${
+      ctx.session.productObj[productId].price *
+      (ctx.session.orderObj[productId].quantity || ctx.session.orderObj[productId].weight)!
+    }\nMaxsulot turi: ${ctx.session.productObj[productId].type}\n${
+      ctx.session.productObj[productId].type === 'miqdor'
+        ? `Maxsulot miqdori: ${ctx.session.orderObj[productId].quantity} ta`
+        : `Maxsulot og'irligi: ${ctx.session.orderObj[productId].weight} kg`
+    }`,
+  })
 
   ctx.session.messageIds.push(message.message_id)
 })

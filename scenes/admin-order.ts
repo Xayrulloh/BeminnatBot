@@ -116,20 +116,17 @@ scene.wait('user').on('callback_query:data', async (ctx) => {
   })
 
   for (const order of orders) {
-    const message = await ctx.replyWithPhoto(
-      `${env.CLOUDFLARE_URL}/${productObj[order.productId].image}`,
-      {
-        caption: `Maxsulot nomi: ${productObj[order.productId].name}\nMaxsulot ma'lumoti: ${
-          productObj[order.productId].description
-        }\nMaxsulot narxi: ${productObj[order.productId].price * (order.quantity || order.weight)!}\nMaxsulot turi: ${
-          productObj[order.productId].type
-        }\n${
-          productObj[order.productId].type === 'miqdor'
-            ? `Maxsulot miqdori: ${order.quantity} ta`
-            : `Maxsulot og'irligi: ${order.weight} kg`
-        }`,
-      },
-    )
+    const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}/${productObj[order.productId].image}`, {
+      caption: `Maxsulot nomi: ${productObj[order.productId].name}\nMaxsulot ma'lumoti: ${
+        productObj[order.productId].description
+      }\nMaxsulot narxi: ${productObj[order.productId].price * (order.quantity || order.weight)!}\nMaxsulot turi: ${
+        productObj[order.productId].type
+      }\n${
+        productObj[order.productId].type === 'miqdor'
+          ? `Maxsulot miqdori: ${order.quantity} ta`
+          : `Maxsulot og'irligi: ${order.weight} kg`
+      }`,
+    })
 
     ctx.session.messageIds.push(message.message_id)
   }
