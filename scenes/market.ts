@@ -7,6 +7,7 @@ import { exitScene } from '#helper/exitScene'
 import customKFunction from '#keyboard/custom'
 import inlineKFunction from '#keyboard/inline'
 import { PER_PAGE } from '#utils/constants'
+import { env } from '#utils/env'
 
 const scene = new Scene<BotContext>('Market')
 
@@ -139,7 +140,7 @@ scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
   if (!product) {
     return exitScene(ctx, "Bunday maxsulot mavjud emas\n\n Asosiy menuga o'tildi")
   } else {
-    const message = await ctx.replyWithPhoto(`https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/${product.image}`, {
+    const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}/${product.image}`, {
       caption: `Nomi: ${product.name}\nMa'lumoti: ${product.description}\nNarxi: ${product.price}\nTuri: ${product.type}`,
       reply_markup: {
         keyboard: customKFunction(1, "➕ Savatga qo'shish", '🚪Chiqish').build(),

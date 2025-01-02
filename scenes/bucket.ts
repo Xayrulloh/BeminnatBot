@@ -198,13 +198,13 @@ scene.wait('location').on('message:location', async (ctx) => {
 
   const distance = bestRoute.distance / 1000
 
-  ctx.session.waybill = 12000
+  ctx.session.waybill = 10000
   ctx.session.userLocation = userLocation
 
   const waybill = await Model.Waybill.findOne<IWaybill>()
 
   if (distance > 2) {
-    ctx.session.waybill = Math.round((12000 + (distance - 2) * waybill!.price) / 100) * 100
+    ctx.session.waybill = Math.round((10000 + (distance - 2) * waybill!.price) / 100) * 100
   }
 
   const message = await ctx.reply(

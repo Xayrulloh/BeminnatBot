@@ -6,6 +6,7 @@ import { exitScene } from '#helper/exitScene'
 import customKFunction from '#keyboard/custom'
 import inlineKFunction from '#keyboard/inline'
 import { PER_PAGE } from '#utils/constants'
+import { env } from '#utils/env'
 
 const scene = new Scene<BotContext>('Order')
 
@@ -107,7 +108,7 @@ scene.wait('product').on(['callback_query:data', 'message:text'], async (ctx) =>
   const productId = ctx.update?.callback_query?.data!
 
   const message = await ctx.replyWithPhoto(
-    `https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/${ctx.session.productObj[productId].image}`,
+    `${env.CLOUDFLARE_URL}/${ctx.session.productObj[productId].image}`,
     {
       caption: `Maxsulot nomi: ${ctx.session.productObj[productId].name}\nMaxsulot ma'lumoti: ${
         ctx.session.productObj[productId].description

@@ -98,7 +98,7 @@ scene.wait('action').on('message:text', async (ctx) => {
   } else {
     ctx.session.command = "✏️ Maxsulotni o'zgartirish" === action ? 'update' : 'create'
 
-    const message = await ctx.replyWithPhoto('https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/browser.jpg', {
+    const message = await ctx.replyWithPhoto(env.CLOUDFLARE_URL + '/browser.jpg', {
       caption:
         "Iltimos ma'lumotlarni quyidagi tartibda kiriting!\n\nNomi:\nMa'lumoti:\nNarxi:\nTuri: (miqdor yoki og'irlik)",
       reply_markup: {
@@ -122,7 +122,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
   if (textData === '🚪Chiqish') {
     return exitScene(ctx, "Asosiy menuga o'tildi")
   } else if (ctx.session.command === 'delete') {
-    const product = await Model.Product.findOne<IProduct>({ name: { $regex: '.*' + textData + '.*', $options: 'i' } })
+    const product = await Model.Product.findOne<IProduct>({ name: textData })
 
     if (!product) {
       return exitScene(ctx, "Bunday maxsulot mavjud emas\n\n Asosiy menuga o'tildi")
@@ -141,7 +141,7 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
     const type = splitData?.[3]?.split('Turi:')?.[1]?.trim()
 
     if (!name || !description || !price || !type) {
-      const message = await ctx.replyWithPhoto('https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/browser.jpg', {
+      const message = await ctx.replyWithPhoto(env.CLOUDFLARE_URL + '/browser.jpg', {
         caption:
           "Iltimos ma'lumotlarni quyidagi tartibda kiriting!\n\nNomi:\nMa'lumoti:\nNarxi:\nTuri: (miqdor yoki og'irlik)",
         reply_markup: {
@@ -158,6 +158,10 @@ scene.wait('command').on(['message:text', 'message:file'], async (ctx) => {
     const telegramFileUrl = `https://api.telegram.org/file/bot${env.TOKEN}/${filePath}`
     const imageName = randomBytes(16).toString('hex') + '.png'
     const product = await Model.Product.findOne<IProduct>({ name })
+
+    if (ctx.session.command === 'create' && product) {
+      return exitScene(ctx, "Bunday maxsulot mavjud\n\n Asosiy menuga o'tildi")
+    }
 
     if (!product && ctx.session.command === 'create') {
       await uploadImage(telegramFileUrl, imageName)
@@ -282,7 +286,7 @@ scene.wait('show').on(['callback_query:data', 'message:text'], async (ctx) => {
   if (!product) {
     return exitScene(ctx, "Bunday maxsulot mavjud emas\n\n Asosiy menuga o'tildi")
   } else {
-    await ctx.replyWithPhoto(`https://pub-077f05899f294e24b391111fce1ebf0b.r2.dev/${product.image}`, {
+    await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}/${product.image}`, {
       caption: `Nomi: ${product.name}\nMa'lumoti: ${product.description}\nNarxi: ${product.price}\nTuri: ${product.type}`,
     })
   }
