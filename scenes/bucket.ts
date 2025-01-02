@@ -48,7 +48,7 @@ scene.step(async (ctx) => {
 
     const buttons = inlineKFunction(1, [{ view: '🗑', text: `delete_${order.id}` }])
 
-    const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}${productObj[order.productId].image}`, {
+    const message = await ctx.replyWithPhoto(`${env.CLOUDFLARE_URL}/${productObj[order.productId].image}`, {
       reply_markup: buttons,
       caption: `Nomi: ${productObj[order.productId].name}\nMa\'lumoti: ${
         productObj[order.productId].description
